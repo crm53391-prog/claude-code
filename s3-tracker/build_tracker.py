@@ -1,0 +1,701 @@
+import json
+
+modules = json.load(open('modules_data.json', encoding='utf-8'))
+
+MODULES_JS = json.dumps(modules, ensure_ascii=False)
+
+STYLE = """
+  :root{
+    --ink:#1C2321;
+    --paper:#EFF2EE;
+    --card:#FFFFFF;
+    --accent:#1F6F5C;
+    --accent-soft:#E1EFEA;
+    --amber:#B4762B;
+    --amber-soft:#F5EAD9;
+    --rust:#B4562B;
+    --rust-soft:#F6E4D9;
+    --line:#DBE1DB;
+    --muted:#5B6660;
+    --shadow:0 1px 2px rgba(28,35,33,.06), 0 8px 24px -16px rgba(28,35,33,.25);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#ECEFEA; --paper:#10160F; --card:#19211C;
+      --accent:#4FBFA0; --accent-soft:rgba(79,191,160,.14);
+      --amber:#E0AE5B; --amber-soft:rgba(224,174,91,.16);
+      --rust:#E08A5B; --rust-soft:rgba(224,138,91,.16);
+      --line:#28322B; --muted:#93A399;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#ECEFEA; --paper:#10160F; --card:#19211C;
+    --accent:#4FBFA0; --accent-soft:rgba(79,191,160,.14);
+    --amber:#E0AE5B; --amber-soft:rgba(224,174,91,.16);
+    --rust:#E08A5B; --rust-soft:rgba(224,138,91,.16);
+    --line:#28322B; --muted:#93A399;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;
+    padding-inline:16px; padding-block:24px 56px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+  .logo{flex:none;width:44px;height:44px;color:var(--accent);}
+  h1{font-size:24px;margin:0;font-weight:700;letter-spacing:.2px;text-wrap:balance;}
+  .tagline{color:var(--muted);margin:2px 0 0;font-size:13px;}
+
+  .lang-switch{position:relative;margin-inline-start:auto;flex:none;}
+  .lang-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+  .lang-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .lang-btn svg{width:18px;height:18px;}
+  .lang-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:4px;display:flex;flex-direction:column;gap:2px;min-width:130px;z-index:10;}
+  .lang-item{text-align:start;padding:8px 11px;border-radius:8px;border:none;background:transparent;color:var(--ink);font-size:13px;font-family:inherit;cursor:pointer;}
+  .lang-item:hover{background:var(--accent-soft);}
+  .lang-item.active{color:var(--accent);font-weight:600;}
+
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px;}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);}
+
+  .exam-box{display:flex;flex-direction:column;gap:6px;}
+  .exam-label{font-size:12.5px;color:var(--muted);}
+  .exam-count{display:flex;align-items:baseline;gap:6px;direction:ltr;justify-content:flex-end;}
+  .exam-count b{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:32px;font-weight:600;color:var(--rust);}
+  .exam-count span{font-size:12.5px;color:var(--muted);}
+  .exam-date{font-size:12px;color:var(--muted);}
+
+  .overall-box{display:flex;flex-direction:column;gap:10px;}
+  .overall-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .overall-top b{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:20px;direction:ltr;}
+  .segbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;display:flex;}
+  .segbar i{display:block;height:100%;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-end:5px;vertical-align:middle;}
+
+  .chev-icon{width:16px;height:16px;}
+  .chev-forward{transform:none;}
+  [dir="rtl"] .chev-forward{transform:scaleX(-1);}
+  .chev-back{transform:scaleX(-1);}
+  [dir="rtl"] .chev-back{transform:none;}
+
+  .home-hint{color:var(--muted);font-size:12.5px;margin:2px 0 12px;}
+  .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .module-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:border-color .12s;}
+  .module-card:hover{border-color:var(--accent);}
+  .module-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .module-card-foot{display:flex;justify-content:space-between;align-items:center;}
+
+  .fr-name{font-weight:700;font-size:16.5px;direction:ltr;text-align:right;unicode-bidi:isolate;display:block;}
+  .ar-sub{color:var(--muted);font-size:12px;margin-top:1px;}
+  .module-frac{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12.5px;font-weight:600;direction:ltr;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 9px;flex:none;white-space:nowrap;}
+  .module-bar{height:5px;background:var(--line);border-radius:999px;overflow:hidden;}
+  .module-bar i{display:block;height:100%;background:var(--accent);}
+
+  .back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer;padding:6px 2px;margin-bottom:12px;}
+  .back-btn:hover{color:var(--accent);}
+  .module-page-card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;}
+  .module-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+  .module-page-head .fr-name{font-size:19px;}
+  .module-page-card .module-bar{margin-bottom:6px;}
+
+  .section{margin-top:14px;}
+  .section-label{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 6px;padding-inline-start:8px;border-inline-start:3px solid var(--accent);}
+  .group{margin-bottom:8px;}
+  .prof{font-size:12px;color:var(--muted);margin:8px 0 4px;font-weight:500;}
+
+  .course-row{display:flex;align-items:flex-start;gap:6px;}
+  .course-main{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:6px 4px;border-radius:8px;cursor:pointer;}
+  .course-main:hover{background:var(--accent-soft);}
+  .status-dot{flex:none;width:22px;height:22px;margin-top:1px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;transition:background .12s,border-color .12s;}
+  .status-dot svg{width:12px;height:12px;display:none;}
+  .course-row.done .status-dot{background:var(--accent);border-color:var(--accent);}
+  .course-row.done .status-dot svg{display:block;stroke:var(--card);}
+  .course-row.inprogress .status-dot{border-color:var(--amber);background:var(--amber-soft);}
+  .course-row.inprogress .status-dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--amber);}
+  .course-title{flex:1;font-size:14px;line-height:1.4;padding-top:2px;}
+  .course-row.done .course-title{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line);}
+  .course-row.inprogress .course-title{color:var(--ink);font-weight:500;}
+
+  .note-btn{flex:none;width:26px;height:26px;margin-top:1px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+  .note-btn svg{width:14px;height:14px;}
+  .note-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .note-btn.has-note{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+
+  .note-box{margin:2px 0 10px;padding-inline-start:38px;}
+  .note-box textarea{width:100%;min-height:58px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-family:inherit;font-size:13px;background:var(--paper);color:var(--ink);resize:vertical;}
+  .note-box textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .note-box textarea[readonly]{opacity:.7;}
+
+  .files-box{margin:14px 0 4px;padding-top:14px;border-top:1px solid var(--line);}
+  .files-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;}
+  .files-head span{font-size:12.5px;font-weight:600;color:var(--muted);}
+  .add-file-btn{flex:none;font-size:12.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);border:none;border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit;}
+  .add-file-btn:hover{filter:brightness(.95);}
+  .files-list{display:flex;flex-direction:column;gap:6px;}
+  .file-chip{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 10px;}
+  .file-chip svg{width:16px;height:16px;color:var(--muted);flex:none;}
+  .file-link{flex:1;min-width:0;font-size:13px;color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-link:hover{color:var(--accent);text-decoration:underline;}
+  .file-remove{flex:none;width:22px;height:22px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;}
+  .file-remove:hover{color:var(--rust);background:var(--rust-soft);}
+  .files-empty{font-size:12.5px;color:var(--muted);}
+  .file-error{font-size:12px;color:var(--rust);margin-top:6px;}
+
+  .readonly-note{font-size:12px;color:var(--rust);background:var(--rust-soft);border-radius:10px;padding:8px 12px;margin-bottom:14px;}
+  footer{margin-top:24px;text-align:center;color:var(--muted);font-size:12px;}
+"""
+
+FONT_HREF = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+
+# ---- JS app (as a real JS function source; will be inserted verbatim) ----
+APP_JS = r"""
+function TabibTrackerApp(state){
+  var MODULES = __MODULES__;
+  var EXAM_DATE = '2027-01-07T08:00:00';
+
+  var LANGS = {
+    ar: {dir:'rtl', label:'العربية', locale:'ar-MA'},
+    en: {dir:'ltr', label:'English', locale:'en-US'},
+    fr: {dir:'ltr', label:'Français', locale:'fr-FR'}
+  };
+  var STRINGS = {
+    ar: {
+      title:'مسار S3', tagline:'تتبع دروس ودكاترة سيميستر 3 قبل الامتحان',
+      examLabel:'باقي على الامتحان', examSoon:'وصل الامتحان', examApprox:'تقريبا:', day:'يوم', hour:'ساعة', dayJoin:' و',
+      overallLabel:'التقدم العام', done:'خلصتها', inprogress:'كنخدم فيها', todo:'باقي',
+      readonly:'هاد الصفحة بصيفة القراءة فقط — التغييرات ماغاديش تتحفظ.',
+      footer:'ضغطة وحدة: كنخدم فيها · جوج ضغطات: خلصتها · تالت ضغطة: كترجع باقي',
+      langBtn:'اللغة', back:'الرئيسية', homeHint:'دوزي على مادة باش تشوفي الدروس ديالها وتسجلي التقدم',
+      openHint:'الدروس والملاحظات', noteBtn:'ملاحظة', notesPlaceholder:'اكتبي ملاحظة على هاد الدرس...',
+      filesLabel:'الملفات والدعامات', addFile:'+ إضافة ملف', removeFile:'حذف', filesEmpty:'ماكاينش ملفات بعد — زيدي بوليكوبي أو ديابو ديال المادة',
+      uploadError:'تعذر رفع الملف (تأكدي أنه PDF أو صورة)'
+    },
+    en: {
+      title:'S3 Track', tagline:'Track your Semester 3 lectures and professors before the exam',
+      examLabel:'Time left until the exam', examSoon:'Exam day is here', examApprox:'Approx.:', day:'d', hour:'h', dayJoin:' ',
+      overallLabel:'Overall progress', done:'Done', inprogress:'In progress', todo:'Remaining',
+      readonly:'This page is read-only — changes will not be saved.',
+      footer:'One tap: in progress · Two taps: done · Three taps: back to remaining',
+      langBtn:'Language', back:'Home', homeHint:'Open a subject to see its lectures and log your progress',
+      openHint:'Lectures & notes', noteBtn:'Note', notesPlaceholder:'Write a note on this lecture...',
+      filesLabel:'Files & materials', addFile:'+ Add file', removeFile:'Remove', filesEmpty:"No files yet — add this subject's handouts or slides",
+      uploadError:'Could not upload the file (make sure it is a PDF or an image)'
+    },
+    fr: {
+      title:'Parcours S3', tagline:"Suis tes cours et professeurs du semestre 3 avant l'examen",
+      examLabel:"Temps restant avant l'examen", examSoon:"Jour de l'examen", examApprox:'Environ :', day:'j', hour:'h', dayJoin:' ',
+      overallLabel:'Progression globale', done:'Terminé', inprogress:'En cours', todo:'Restant',
+      readonly:'Cette page est en lecture seule — les modifications ne seront pas enregistrées.',
+      footer:'Un clic : en cours · Deux clics : terminé · Trois clics : retour à restant',
+      langBtn:'Langue', back:'Accueil', homeHint:'Ouvre une matière pour voir ses cours et suivre ta progression',
+      openHint:'Cours & notes', noteBtn:'Note', notesPlaceholder:'Écris une note sur ce cours...',
+      filesLabel:'Fichiers & supports', addFile:'+ Ajouter un fichier', removeFile:'Supprimer', filesEmpty:"Aucun fichier pour l'instant — ajoute les polycopiés ou diapos de cette matière",
+      uploadError:"Échec de l'envoi du fichier (vérifie que c'est un PDF ou une image)"
+    }
+  };
+
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+
+  function courseCount(){ return MODULES.reduce(function(n,m){ return n + m.sections.reduce(function(k,s){ return k + s.groups.reduce(function(j,g){ return j + g.courses.length; },0); },0); },0); }
+
+  function moduleCounts(mi){
+    var m = MODULES[mi], done=0, inprog=0, total=0;
+    m.sections.forEach(function(s, si){
+      s.groups.forEach(function(g, gi){
+        g.courses.forEach(function(c, ci){
+          total++;
+          var id = mi+'_'+si+'_'+gi+'_'+ci;
+          var st = state.progress[id];
+          if(st==='done') done++;
+          else if(st==='inprogress') inprog++;
+        });
+      });
+    });
+    return {done:done, inprog:inprog, total:total};
+  }
+
+  function overallCounts(){
+    var done=0, inprog=0, total=0;
+    MODULES.forEach(function(m,mi){
+      var c = moduleCounts(mi);
+      done += c.done; inprog += c.inprog; total += c.total;
+    });
+    return {done:done, inprog:inprog, total:total};
+  }
+
+  function statusIcon(){
+    return '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  function globeIcon(){
+    return '<svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M2 10h16M10 2c2.5 2.5 2.5 13 0 16M10 2c-2.5 2.5-2.5 13 0 16" stroke="currentColor" stroke-width="1.6"/></svg>';
+  }
+
+  function chevIcon(kind){
+    return '<svg class="chev-icon chev-'+kind+'" viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  function noteIcon(){
+    return '<svg viewBox="0 0 20 20" fill="none"><path d="M3 4h14v9H8l-4 3v-3H3V4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  }
+
+  function fileIcon(){
+    return '<svg viewBox="0 0 20 20" fill="none"><path d="M6 2.5h5.5L15 6v10.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 2.5V6h4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+
+  function renderCourse(mi, si, gi, ci, title, T){
+    var id = mi+'_'+si+'_'+gi+'_'+ci;
+    var st = state.progress[id];
+    var cls = st==='done' ? ' done' : (st==='inprogress' ? ' inprogress' : '');
+    var note = (state.notes && state.notes[id]) || '';
+    var noteOpen = !!openNotes[id];
+    var hasNote = note.trim().length > 0;
+    var row = '' +
+      '<div class="course-row'+cls+'">' +
+        '<div class="course-main" data-course="'+id+'" role="button" tabindex="0" aria-label="'+esc(title)+'">' +
+          '<span class="status-dot">'+statusIcon()+'</span>' +
+          '<span class="course-title">'+esc(title)+'</span>' +
+        '</div>' +
+        '<button type="button" class="note-btn'+(hasNote?' has-note':'')+'" data-note-toggle="'+id+'" aria-label="'+T.noteBtn+'">'+noteIcon()+'</button>' +
+      '</div>';
+    if(noteOpen){
+      row += '<div class="note-box"><textarea data-note-input="'+id+'" placeholder="'+esc(T.notesPlaceholder)+'"'+(state.readonly?' readonly':'')+'>'+esc(note)+'</textarea></div>';
+    }
+    return row;
+  }
+
+  function renderModuleBody(mi, T){
+    var m = MODULES[mi];
+    return m.sections.map(function(s, si){
+      var groups = s.groups.map(function(g, gi){
+        var courses = g.courses.map(function(title, ci){ return renderCourse(mi, si, gi, ci, title, T); }).join('');
+        var profLine = g.prof ? '<div class="prof">'+esc(g.prof)+'</div>' : '';
+        return '<div class="group">'+profLine+courses+'</div>';
+      }).join('');
+      var label = s.label ? '<div class="section-label">'+esc(s.label)+'</div>' : '';
+      return '<div class="section">'+label+groups+'</div>';
+    }).join('');
+  }
+
+  function renderHome(T, lang){
+    var cards = MODULES.map(function(m, mi){
+      var c = moduleCounts(mi);
+      var pct = c.total ? Math.round(c.done/c.total*100) : 0;
+      return '' +
+        '<div class="module-card" data-open-module="'+mi+'" role="button" tabindex="0" aria-label="'+esc(m.fr)+'">' +
+          '<div>' +
+            '<span class="fr-name">'+esc(m.fr)+'</span>' +
+            (lang==='ar' ? '<div class="ar-sub">'+esc(m.ar)+'</div>' : '') +
+          '</div>' +
+          '<div class="module-bar"><i style="width:'+pct+'%"></i></div>' +
+          '<div class="module-card-foot">' +
+            '<span class="module-frac">'+c.done+'/'+c.total+'</span>' +
+            chevIcon('forward') +
+          '</div>' +
+        '</div>';
+    }).join('');
+    return '<p class="home-hint">'+T.homeHint+'</p><div class="home-grid">'+cards+'</div>';
+  }
+
+  function renderFilesBox(mi, T){
+    var files = (state.files && state.files[mi]) || [];
+    var list = files.length ? (
+      '<div class="files-list">' +
+      files.map(function(f){
+        return '<div class="file-chip">' + fileIcon() +
+          '<a class="file-link" href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.name)+'</a>' +
+          (state.readonly ? '' : '<button type="button" class="file-remove" data-remove-file="'+mi+'|'+f.id+'" aria-label="'+T.removeFile+'">×</button>') +
+        '</div>';
+      }).join('') +
+      '</div>'
+    ) : '<div class="files-empty">'+T.filesEmpty+'</div>';
+    var err = fileErrors[mi] ? '<div class="file-error">'+esc(fileErrors[mi])+'</div>' : '';
+    return '' +
+      '<div class="files-box">' +
+        '<div class="files-head">' +
+          '<span>'+T.filesLabel+'</span>' +
+          (state.readonly ? '' : (
+            '<button type="button" class="add-file-btn" data-add-file="'+mi+'">'+T.addFile+'</button>' +
+            '<input type="file" class="file-input" data-file-input="'+mi+'" style="display:none" accept=".pdf,image/*">'
+          )) +
+        '</div>' +
+        list + err +
+      '</div>';
+  }
+
+  function renderModulePage(mi, T, lang){
+    var m = MODULES[mi];
+    var c = moduleCounts(mi);
+    var pct = c.total ? Math.round(c.done/c.total*100) : 0;
+    return '' +
+      '<button type="button" class="back-btn" data-go-home>'+chevIcon('back')+T.back+'</button>' +
+      '<div class="module-page-card">' +
+        '<div class="module-page-head">' +
+          '<div>' +
+            '<span class="fr-name">'+esc(m.fr)+'</span>' +
+            (lang==='ar' ? '<div class="ar-sub">'+esc(m.ar)+'</div>' : '') +
+          '</div>' +
+          '<span class="module-frac">'+c.done+'/'+c.total+'</span>' +
+        '</div>' +
+        '<div class="module-bar"><i style="width:'+pct+'%"></i></div>' +
+        renderFilesBox(mi, T) +
+        renderModuleBody(mi, T) +
+      '</div>' +
+      '<footer>'+T.footer+'</footer>';
+  }
+
+  function formatCountdown(d, h, T, lang){
+    if(lang==='ar') return d+' '+T.day+T.dayJoin+h+' '+T.hour;
+    return d+T.day+' '+h+T.hour;
+  }
+
+  function renderApp(){
+    var lang = state.lang || 'ar';
+    var T = STRINGS[lang];
+
+    var langMenu = langMenuOpen ? (
+      '<div class="lang-menu" role="menu">' +
+      ['ar','en','fr'].map(function(code){
+        return '<button type="button" class="lang-item'+(code===lang?' active':'')+'" data-lang="'+code+'" role="menuitem">'+LANGS[code].label+'</button>';
+      }).join('') +
+      '</div>'
+    ) : '';
+
+    var topHtml = '' +
+      '<div class="top">' +
+        '<svg class="logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.4"/>' +
+          '<path d="M8 25h6l3-8 5 16 4-11 2.5 6H40" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '<path d="M24 12v6M21 15h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>' +
+        '</svg>' +
+        '<div>' +
+          '<h1>'+T.title+'</h1>' +
+          '<p class="tagline">'+T.tagline+'</p>' +
+        '</div>' +
+        '<div class="lang-switch">' +
+          '<button type="button" class="lang-btn" data-toggle-lang aria-label="'+T.langBtn+'" aria-expanded="'+(langMenuOpen?'true':'false')+'">'+globeIcon()+'</button>' +
+          langMenu +
+        '</div>' +
+      '</div>';
+
+    var readonlyHtml = state.readonly ? '<div class="readonly-note">'+T.readonly+'</div>' : '';
+
+    if(view === 'module' && activeModule != null){
+      return topHtml + readonlyHtml + renderModulePage(activeModule, T, lang);
+    }
+
+    var total = courseCount();
+    var oc = overallCounts();
+    var donePct = Math.round(oc.done/total*100);
+    var progPct = Math.round(oc.inprog/total*100);
+    var todo = total - oc.done - oc.inprog;
+
+    var now = new Date();
+    var exam = new Date(EXAM_DATE);
+    var diffMs = exam - now;
+    var d = Math.max(0, Math.floor(diffMs/86400000));
+    var h = Math.max(0, Math.floor((diffMs%86400000)/3600000));
+    var examLabel = diffMs <= 0 ? T.examSoon : formatCountdown(d, h, T, lang);
+    var examDateFmt = exam.toLocaleDateString(LANGS[lang].locale, {day:'2-digit', month:'long', year:'numeric'});
+
+    var heroHtml = '' +
+      '<div class="hero">' +
+        '<div class="box exam-box">' +
+          '<span class="exam-label">'+T.examLabel+'</span>' +
+          '<div class="exam-count"><b>'+examLabel+'</b></div>' +
+          '<span class="exam-date">'+T.examApprox+' '+examDateFmt+'</span>' +
+        '</div>' +
+        '<div class="box overall-box">' +
+          '<div class="overall-top"><span class="exam-label">'+T.overallLabel+'</span><b>'+oc.done+' / '+total+'</b></div>' +
+          '<div class="segbar"><i style="width:'+donePct+'%;background:var(--accent)"></i><i style="width:'+progPct+'%;background:var(--amber)"></i></div>' +
+          '<div class="legend"><span><i style="background:var(--accent)"></i>'+T.done+' ('+oc.done+')</span><span><i style="background:var(--amber)"></i>'+T.inprogress+' ('+oc.inprog+')</span><span><i style="background:var(--line)"></i>'+T.todo+' ('+todo+')</span></div>' +
+        '</div>' +
+      '</div>';
+
+    return topHtml + heroHtml + readonlyHtml + renderHome(T, lang);
+  }
+
+  function buildDocument(pureState){
+    var appSrc = TabibTrackerApp.toString();
+    var lang = pureState.lang || 'ar';
+    var dir = LANGS[lang].dir;
+    return '<!doctype html>\n' +
+      '<html lang="'+lang+'" dir="'+dir+'">\n' +
+      '<head>\n' +
+        '<meta charset="utf-8">\n' +
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
+        '<title>'+STRINGS[lang].title+'</title>\n' +
+        document.getElementById('app-style').outerHTML + '\n' +
+        document.getElementById('app-font').outerHTML + '\n' +
+      '</head>\n' +
+      '<body>\n' +
+        '<div class="wrap" id="wrap" dir="'+dir+'" lang="'+lang+'"><div id="root"></div></div>\n' +
+        '<script>(' + appSrc + ')(' + JSON.stringify(pureState) + ');<' + '/script>\n' +
+      '</body>\n' +
+      '</html>';
+  }
+
+  var root = document.getElementById('root');
+  var wrapEl = document.getElementById('wrap');
+  var debounceTimer = null;
+  var artifactApi = null;
+  var assetsApi = null;
+
+  var langMenuOpen = false;
+  var openNotes = {};
+  var view = 'home';
+  var activeModule = null;
+  var audioCtx = null;
+  var fileErrors = {};
+
+  function playTick(){
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      if(!audioCtx) audioCtx = new AC();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      var t = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(680, t);
+      osc.frequency.exponentialRampToValueAtTime(400, t + 0.08);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.16, t + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    } catch(e){}
+  }
+
+  function pureState(){
+    return {progress: state.progress, notes: state.notes, files: state.files, lang: state.lang || 'ar'};
+  }
+
+  function applyDir(){
+    var lang = state.lang || 'ar';
+    var dir = LANGS[lang].dir;
+    if(wrapEl){ wrapEl.setAttribute('dir', dir); wrapEl.setAttribute('lang', lang); }
+    if(document.documentElement){ document.documentElement.setAttribute('dir', dir); document.documentElement.setAttribute('lang', lang); }
+  }
+
+  function paint(){
+    applyDir();
+    root.innerHTML = renderApp();
+  }
+
+  function schedulePublish(){
+    if(debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(doPublish, 500);
+  }
+
+  function doPublish(){
+    if(!artifactApi) return;
+    artifactApi.publish(buildDocument(pureState())).catch(function(){ /* conflict: view reloads to winner */ });
+  }
+
+  function cycleStatus(id){
+    if(!state.progress) state.progress = {};
+    var cur = state.progress[id];
+    var next = cur==='done' ? undefined : (cur==='inprogress' ? 'done' : 'inprogress');
+    if(next===undefined) delete state.progress[id]; else state.progress[id] = next;
+  }
+
+  root.addEventListener('click', function(e){
+    if(langMenuOpen && !e.target.closest('.lang-switch')){
+      langMenuOpen = false;
+      paint();
+    }
+
+    var toggleLangEl = e.target.closest('[data-toggle-lang]');
+    if(toggleLangEl){
+      playTick();
+      langMenuOpen = !langMenuOpen;
+      paint();
+      return;
+    }
+    var langItemEl = e.target.closest('[data-lang]');
+    if(langItemEl){
+      playTick();
+      state.lang = langItemEl.getAttribute('data-lang');
+      langMenuOpen = false;
+      paint();
+      schedulePublish();
+      return;
+    }
+
+    var openModuleEl = e.target.closest('[data-open-module]');
+    if(openModuleEl){
+      playTick();
+      activeModule = parseInt(openModuleEl.getAttribute('data-open-module'), 10);
+      view = 'module';
+      paint();
+      window.scrollTo(0,0);
+      return;
+    }
+    var goHomeEl = e.target.closest('[data-go-home]');
+    if(goHomeEl){
+      playTick();
+      view = 'home';
+      activeModule = null;
+      paint();
+      window.scrollTo(0,0);
+      return;
+    }
+
+    var noteToggleEl = e.target.closest('[data-note-toggle]');
+    if(noteToggleEl){
+      playTick();
+      var nid = noteToggleEl.getAttribute('data-note-toggle');
+      openNotes[nid] = !openNotes[nid];
+      paint();
+      return;
+    }
+
+    var addFileEl = e.target.closest('[data-add-file]');
+    if(addFileEl){
+      if(state.readonly) return;
+      playTick();
+      var miAdd = addFileEl.getAttribute('data-add-file');
+      var inputEl = root.querySelector('[data-file-input="'+miAdd+'"]');
+      if(inputEl) inputEl.click();
+      return;
+    }
+
+    var removeFileEl = e.target.closest('[data-remove-file]');
+    if(removeFileEl){
+      if(state.readonly) return;
+      playTick();
+      var parts = removeFileEl.getAttribute('data-remove-file').split('|');
+      var miDel = parts[0], fidDel = parts[1];
+      if(assetsApi) assetsApi.delete(fidDel).catch(function(){});
+      if(state.files && state.files[miDel]){
+        state.files[miDel] = state.files[miDel].filter(function(f){ return f.id !== fidDel; });
+      }
+      paint();
+      doPublish();
+      return;
+    }
+
+    var courseEl = e.target.closest('[data-course]');
+    if(courseEl){
+      if(state.readonly) return;
+      playTick();
+      cycleStatus(courseEl.getAttribute('data-course'));
+      paint();
+      schedulePublish();
+      return;
+    }
+  });
+
+  root.addEventListener('keydown', function(e){
+    if(e.key!=='Enter' && e.key!==' ') return;
+    var courseEl = e.target.closest('[data-course]');
+    var openModuleEl = e.target.closest('[data-open-module]');
+    if(courseEl){
+      e.preventDefault();
+      if(state.readonly) return;
+      playTick();
+      cycleStatus(courseEl.getAttribute('data-course'));
+      paint();
+      schedulePublish();
+    } else if(openModuleEl){
+      e.preventDefault();
+      playTick();
+      activeModule = parseInt(openModuleEl.getAttribute('data-open-module'), 10);
+      view = 'module';
+      paint();
+      window.scrollTo(0,0);
+    }
+  });
+
+  root.addEventListener('input', function(e){
+    var noteEl = e.target.closest('[data-note-input]');
+    if(!noteEl || state.readonly) return;
+    if(!state.notes) state.notes = {};
+    state.notes[noteEl.getAttribute('data-note-input')] = noteEl.value;
+    schedulePublish();
+  });
+
+  root.addEventListener('blur', function(e){
+    var noteEl = e.target.closest && e.target.closest('[data-note-input]');
+    if(!noteEl || state.readonly) return;
+    doPublish();
+  }, true);
+
+  root.addEventListener('change', function(e){
+    var inputEl = e.target.closest('[data-file-input]');
+    if(!inputEl) return;
+    var miUp = inputEl.getAttribute('data-file-input');
+    var file = inputEl.files && inputEl.files[0];
+    inputEl.value = '';
+    if(!file || !assetsApi || state.readonly) return;
+    fileErrors[miUp] = null;
+    assetsApi.upload(file).then(function(res){
+      if(!state.files) state.files = {};
+      if(!state.files[miUp]) state.files[miUp] = [];
+      state.files[miUp].push({id: res.id, url: res.url, name: file.name});
+      paint();
+      doPublish();
+    }).catch(function(){
+      fileErrors[miUp] = STRINGS[state.lang || 'ar'].uploadError;
+      paint();
+    });
+  });
+
+  paint();
+  setInterval(paint, 60000);
+
+  if(window.claude && typeof window.claude.use === 'function'){
+    Promise.all([window.claude.use('artifact'), window.claude.use('assets')]).then(function(apis){
+      artifactApi = apis[0];
+      assetsApi = apis[1];
+      if(!artifactApi){ state.readonly = true; }
+      paint();
+    }).catch(function(){ state.readonly = true; paint(); });
+  } else {
+    state.readonly = true; paint();
+  }
+}
+"""
+
+app_js_filled = APP_JS.replace('__MODULES__', MODULES_JS)
+
+# Current live progress (preserved across this redeploy) + default language.
+CURRENT_PROGRESS = {
+    "0_0_0_0": "inprogress", "0_0_1_0": "done", "0_0_1_1": "done", "0_0_1_2": "done", "0_0_1_3": "done",
+    "1_0_3_0": "done", "1_1_0_0": "done", "1_1_2_0": "done", "1_3_0_0": "done", "1_3_0_1": "inprogress",
+    "2_0_0_1": "inprogress", "3_0_0_1": "inprogress", "4_1_0_0": "done"
+}
+INIT_STATE = json.dumps({
+    "progress": CURRENT_PROGRESS,
+    "notes": {},
+    "files": {},
+    "lang": "fr"
+}, ensure_ascii=False)
+
+HTML = (
+    '<title>مسار S3</title>\n'
+    '<style id="app-style">' + STYLE + '</style>\n'
+    '<link id="app-font" rel="stylesheet" href="' + FONT_HREF + '">\n\n'
+    '<div class="wrap" id="wrap" dir="rtl" lang="ar">\n'
+    '  <div id="root"></div>\n'
+    '</div>\n\n'
+    '<script>\n'
+    + app_js_filled +
+    '\nTabibTrackerApp(' + INIT_STATE + ');\n'
+    '</script>\n'
+)
+
+open('tabib-tracker.html','w',encoding='utf-8').write(HTML)
+print('wrote', len(HTML), 'bytes')
