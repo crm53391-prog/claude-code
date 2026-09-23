@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reel Editor</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --card: #ffffff; --text: #1d1d1f; --muted: #6b6b70;
+    --border: #e3e1dc; --accent: #e1306c; --accent-2: #833ab4; --ok: #1f9d55; --err: #c62828;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214; --card: #1c1c1f; --text: #f2f2f3; --muted: #a0a0a6;
+      --border: #2e2e33; --ok: #4ade80; --err: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; line-height: 1.6;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { margin: 0 0 4px; font-size: 1.8rem; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 20px; margin-bottom: 16px;
+  }
+  .drop {
+    display: block; border: 2px dashed var(--border); border-radius: 12px; padding: 18px;
+    text-align: center; cursor: pointer; transition: border-color .15s;
+  }
+  .drop:hover, .drop.has-file { border-color: var(--accent); }
+  .drop input { display: none; }
+  .drop strong { display: block; }
+  .drop span { color: var(--muted); font-size: .9rem; word-break: break-all; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  label.title { display: block; font-weight: 600; margin: 16px 0 6px; }
+  textarea {
+    width: 100%; min-height: 90px; padding: 10px; border-radius: 10px; resize: vertical;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text); font: inherit;
+  }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+  button {
+    width: 100%; margin-top: 16px; padding: 14px; border: 0; border-radius: 12px; cursor: pointer;
+    font: inherit; font-weight: 700; font-size: 1.05rem; color: #fff;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .bar { height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; margin: 12px 0 6px; }
+  .bar div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .3s; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .err { color: var(--err); white-space: pre-wrap; direction: ltr; text-align: left; font-size: .85rem; }
+  .warn { color: var(--muted); font-size: .85rem; direction: ltr; text-align: left; }
+  video { width: 100%; max-height: 70vh; border-radius: 12px; background: #000; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .pill { border: 1px solid var(--border); border-radius: 99px; padding: 2px 12px; font-size: .9rem; }
+  a.dl {
+    display: block; text-align: center; margin-top: 12px; padding: 12px; border-radius: 12px;
+    background: var(--ok); color: #fff; text-decoration: none; font-weight: 700;
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎬 Reel Editor</h1>
+  <p class="sub">دخل الفيديو ديالك، وزيد فيديو مثال إلا بغيتي، والسيت يمونطيه ليك بنفس الستيل على شكل Reel.</p>
+
+  <form id="form" class="card">
+    <div class="grid">
+      <label class="drop" id="drop-video">
+        <input type="file" name="video" accept="video/*" required>
+        <strong>📹 الفيديو ديالك</strong>
+        <span>ضغط باش تختار (ضروري)</span>
+      </label>
+      <label class="drop" id="drop-ref">
+        <input type="file" name="reference" accept="video/*">
+        <strong>⭐ فيديو مثال</strong>
+        <span>الستيل اللي بغيتي تقلدو (اختياري)</span>
+      </label>
+    </div>
+
+    <label class="title" for="notes">📝 شرح المونتاج اللي بغيتي (بالإنجليزية، الدارجة ولا الفرنسية)</label>
+    <textarea id="notes" name="notes" placeholder="e.g. fast cuts, remove all pauses, strong punch-in zoom every 2 seconds"></textarea>
+
+    <div class="row">
+      <input type="checkbox" id="use_ai" checked>
+      <label for="use_ai">استعمل الذكاء الاصطناعي (Claude) باش يحلل الستيل</label>
+    </div>
+
+    <button type="submit" id="go">مونطي الفيديو ✨</button>
+  </form>
+
+  <section id="progress" class="card" hidden>
+    <strong id="msg">كنرفعو الفيديو...</strong>
+    <div class="bar"><div id="fill"></div></div>
+    <div class="muted" id="pct">0%</div>
+    <div class="err" id="error" hidden></div>
+  </section>
+
+  <section id="result" class="card" hidden>
+    <strong>✅ الفيديو واجد</strong>
+    <p id="summary"></p>
+    <div class="stats" id="stats"></div>
+    <p class="warn" id="warning" hidden></p>
+    <video id="player" controls playsinline></video>
+    <a class="dl" id="download" href="#">⬇️ تحميل الفيديو</a>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  for (const id of ["drop-video", "drop-ref"]) {
+    const box = $(id), input = box.querySelector("input");
+    input.addEventListener("change", () => {
+      const f = input.files[0];
+      box.classList.toggle("has-file", !!f);
+      if (f) box.querySelector("span").textContent = `${f.name} · ${(f.size / 1e6).toFixed(1)} MB`;
+    });
+  }
+
+  function setProgress(value, message) {
+    $("fill").style.width = `${Math.round(value * 100)}%`;
+    $("pct").textContent = `${Math.round(value * 100)}%`;
+    if (message) $("msg").textContent = message;
+  }
+
+  function showError(text) {
+    $("error").hidden = false;
+    $("error").textContent = text;
+    $("go").disabled = false;
+  }
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = new FormData($("form"));
+    data.set("use_ai", $("use_ai").checked ? "true" : "false");
+    if (!data.get("reference")?.size) data.delete("reference");
+
+    $("go").disabled = true;
+    $("result").hidden = true;
+    $("progress").hidden = false;
+    $("error").hidden = true;
+    setProgress(0, "كنرفعو الفيديو...");
+
+    // XHR (not fetch) so we can show upload progress for big files.
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/edit");
+    xhr.upload.onprogress = (ev) => {
+      if (ev.lengthComputable) setProgress(ev.loaded / ev.total * 0.2, "كنرفعو الفيديو...");
+    };
+    xhr.onload = () => {
+      if (xhr.status !== 200) return showError(`Upload failed (${xhr.status}): ${xhr.responseText}`);
+      poll(JSON.parse(xhr.responseText).job_id);
+    };
+    xhr.onerror = () => showError("Upload failed: network error");
+    xhr.send(data);
+  });
+
+  async function poll(jobId) {
+    let job;
+    try {
+      job = await (await fetch(`/api/jobs/${jobId}`)).json();
+    } catch {
+      return setTimeout(() => poll(jobId), 2000);
+    }
+    // Upload used the first 20% of the bar; processing fills the rest.
+    setProgress(0.2 + job.progress * 0.8, job.message);
+    if (job.status === "running") return setTimeout(() => poll(jobId), 1000);
+    if (job.status === "error") return showError(job.error);
+    showResult(jobId, job);
+  }
+
+  function showResult(jobId, job) {
+    $("go").disabled = false;
+    $("result").hidden = false;
+    $("summary").textContent = job.plan.summary;
+    const p = job.plan, s = job.stats;
+    const zoom = { punch: "زوم متناوب", slow: "زوم بشوية", none: "بلا زوم" }[p.zoom_style];
+    const pills = [
+      p.source === "ai" ? "🤖 AI" : "⚙️ Auto",
+      `${s.original_duration}s ← ${s.final_duration}s`,
+      `${s.shots} لقطة`,
+      `قطعة كل ~${p.shot_length.toFixed(1)}s`,
+      `${zoom} ×${p.zoom_amount.toFixed(2)}`,
+      p.remove_silences ? "بلا سكوت" : "السكوت خلّيناه",
+    ];
+    $("stats").replaceChildren(...pills.map((t) => {
+      const el = document.createElement("span");
+      el.className = "pill";
+      el.textContent = t;
+      return el;
+    }));
+    $("warning").hidden = !job.warning;
+    $("warning").textContent = job.warning || "";
+    $("player").src = `/api/jobs/${jobId}/video?t=${Date.now()}`;
+    $("download").href = `/api/jobs/${jobId}/video?download=true`;
+    $("result").scrollIntoView({ behavior: "smooth" });
+  }
+</script>
+</body>
+</html>
