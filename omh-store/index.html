@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OMH Chaussures</title>
+<meta name="description" content="OMH, boutique de chaussures : baskets, babouches, talons, bottes, sandales, enfants. Commande sur WhatsApp, paiement à la livraison.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Readex+Pro:wght@300..700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--OMH-BODY-START-->
+<a class="skip" href="#catalogue" data-i18n="skip">Aller au catalogue</a>
+
+<header class="top">
+  <div class="top__inner wrap">
+    <a class="logo" href="#top" aria-label="OMH">OMH</a>
+    <nav class="top__nav" aria-label="Menu">
+      <a href="#catalogue" data-i18n="navCatalogue">Catalogue</a>
+      <a href="#pointures" data-i18n="navSizes">Guide des pointures</a>
+      <a href="#contact" data-i18n="navContact">Contact</a>
+    </nav>
+    <div class="top__tools">
+      <div class="lang" role="group" aria-label="Langue / اللغة / Language">
+        <button type="button" class="lang__btn" data-lang="fr" lang="fr">FR</button>
+        <button type="button" class="lang__btn" data-lang="ar" lang="ar">ع</button>
+        <button type="button" class="lang__btn" data-lang="en" lang="en">EN</button>
+      </div>
+      <button type="button" class="cart-btn" id="open-cart" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span data-i18n="cart">Panier</span>
+        <span class="cart-btn__count" id="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero__copy">
+      <h1 id="hero-title" data-i18n="heroTitle">Tout ce qui se porte aux pieds.</h1>
+      <p data-i18n="heroText"></p>
+    </div>
+
+    <div class="ruler" aria-labelledby="ruler-label">
+      <div class="ruler__head">
+        <span id="ruler-label" class="ruler__label" data-i18n="rulerLabel">Votre pointure (EU)</span>
+        <span class="ruler__hint" data-i18n="rulerHint"></span>
+      </div>
+      <div class="ruler__track" id="ruler" role="group" aria-labelledby="ruler-label"></div>
+    </div>
+  </section>
+
+  <section id="catalogue" class="catalogue wrap" aria-labelledby="cat-title" tabindex="-1">
+    <h2 id="cat-title" class="visually-hidden" data-i18n="navCatalogue">Catalogue</h2>
+    <div class="types" id="types" role="group" aria-label="Types"></div>
+
+    <div class="bar">
+      <p class="bar__count" id="result-count" aria-live="polite"></p>
+      <div class="bar__controls">
+        <div class="seg" id="gender" role="group" aria-labelledby="gender-label">
+          <span id="gender-label" class="visually-hidden" data-i18n="gender">Pour</span>
+        </div>
+        <label class="sort">
+          <span data-i18n="sort">Trier</span>
+          <select id="sort">
+            <option value="popular" data-i18n="sortPopular">Sélection OMH</option>
+            <option value="up" data-i18n="sortPriceUp">Prix croissant</option>
+            <option value="down" data-i18n="sortPriceDown">Prix décroissant</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <ul class="grid" id="grid"></ul>
+    <div class="empty" id="empty" hidden>
+      <p class="empty__title" data-i18n="emptyTitle"></p>
+      <p data-i18n="emptyText"></p>
+      <button type="button" class="btn btn--ghost" id="reset" data-i18n="emptyReset">Effacer les filtres</button>
+    </div>
+  </section>
+
+  <section id="pointures" class="guide wrap" aria-labelledby="guide-title">
+    <div class="guide__copy">
+      <h2 id="guide-title" data-i18n="sizeGuideTitle">Trouver sa pointure</h2>
+      <p data-i18n="sizeGuideText"></p>
+    </div>
+    <div class="guide__table">
+      <table>
+        <thead><tr><th scope="col" data-i18n="euSize">Pointure EU</th><th scope="col" data-i18n="footLength">Longueur du pied</th></tr></thead>
+        <tbody id="guide-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="contact" class="contact wrap" aria-labelledby="contact-title">
+    <h2 id="contact-title" data-i18n="contactTitle">La boutique</h2>
+    <p data-i18n="contactText"></p>
+    <p class="contact__line">
+      <span class="contact__phone" id="phone"></span>
+      <button type="button" class="btn btn--ghost" id="copy-phone" data-i18n="copy">Copier le numéro</button>
+      <span class="contact__city" id="city"></span>
+    </p>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <span class="logo logo--small">OMH</span>
+  <span data-i18n="footer"></span>
+</footer>
+
+<dialog class="sheet" id="product" aria-labelledby="p-name">
+  <form method="dialog" class="sheet__close"><button class="icon-btn" aria-label="Fermer" data-i18n-label="close">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button></form>
+  <div class="sheet__body" id="product-body"></div>
+</dialog>
+
+<dialog class="drawer" id="cart" aria-labelledby="cart-title">
+  <div class="drawer__head">
+    <h2 id="cart-title" data-i18n="cartTitle">Votre panier</h2>
+    <form method="dialog"><button class="icon-btn" aria-label="Fermer" data-i18n-label="close">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button></form>
+  </div>
+  <div class="drawer__body" id="cart-body"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!--OMH-BODY-END-->
+
+<script src="products.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
