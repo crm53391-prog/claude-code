@@ -1,5 +1,6 @@
 (() => {
   const CFG = window.OMH_CONFIG;
+  const FAMILIES = window.OMH_FAMILIES;
   const CATS = window.OMH_CATEGORIES;
   const PRODUCTS = window.OMH_PRODUCTS;
   const MATS = window.OMH_MATERIALS;
@@ -7,6 +8,7 @@
   const I18N = window.OMH_I18N;
   const RULER_SIZES = range(19, 47);
   const $ = (s, r = document) => r.querySelector(s);
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
   /* ---------- storage (never required for the page to work) ---------- */
   const store = {
@@ -17,7 +19,6 @@
   const state = {
     lang: I18N[store.get("lang", "")] ? store.get("lang") : guessLang(),
     size: null,
-    cat: "all",
     gender: "all",
     sort: "popular",
     cart: sanitizeCart(store.get("cart", [])),
@@ -28,19 +29,24 @@
     const l = (navigator.language || "fr").slice(0, 2);
     return I18N[l] ? l : "fr";
   }
-  function sanitizeCart(c) {
-    return Array.isArray(c) ? c.filter((l) => l && byId(l.id) && l.qty > 0) : [];
-  }
+  function sanitizeCart(c) { return Array.isArray(c) ? c.filter((l) => l && byId(l.id) && l.qty > 0) : []; }
   function range(a, b) { const out = []; for (let i = a; i <= b; i++) out.push(i); return out; }
   function byId(id) { return PRODUCTS.find((p) => p.id === id); }
   function catOf(p) { return CATS.find((c) => c.id === p.cat); }
   const t = (k, ...args) => { const v = I18N[state.lang][k]; return typeof v === "function" ? v(...args) : v; };
   const L = (obj) => (obj ? obj[state.lang] || obj.fr : "");
-  const money = (n) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202F")} ${L(CFG.currency)}`;
+  const money = (n) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} ${L(CFG.currency)}`;
   const sep = () => (state.lang === "ar" ? "، " : ", ");
   /* EU (Paris point) size to foot length: last = size × 2/3 cm, foot ≈ last − 1.5 cm */
   const footCm = (s) => (s * 2 / 3 - 1.5).toFixed(1);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const metaOf = (p) => {
+    const parts = [];
+    if (p.cat !== "enfants") parts.push(esc(t("gender_" + p.gender)));
+    parts.push(esc(L(MATS[p.mat])));
+    if (p.isNew) parts.push(`<span class="new">${esc(t("newBadge"))}</span>`);
+    return parts.join(sep());
+  };
 
   /* ---------- shoe drawings (placeholders until real photos) ---------- */
   const SOLE = (c) => `<path d="M8 54h104c3 0 4 3 3 5l-1 2c-1 2-3 3-5 3H13c-3 0-5-2-5-5z" fill="${c}"/>`;
@@ -68,14 +74,12 @@
   function drawing(p, extraClass = "") {
     const cat = catOf(p);
     const [a, b] = p.colorPick || p.colors;
-    return `<svg viewBox="0 0 124 70" class="${extraClass}" aria-hidden="true" focusable="false">${SHAPES[cat.shape](a, b || "#1B1F2A")}</svg>`;
+    return `<svg viewBox="0 0 124 70" class="${extraClass}" aria-hidden="true" focusable="false"><g stroke="currentColor" stroke-opacity=".45" stroke-width="1.1" stroke-linejoin="round">${SHAPES[cat.shape](a, b || "#1B1F2A")}</g></svg>`;
   }
-  const tint = (hex) => `background:color-mix(in srgb, ${hex} 16%, var(--surface))`;
 
   /* ---------- filtering ---------- */
   function fitsSize(p, s) {
-    if (s == null) return true;
-    if (!p.sizes) return true; // one size
+    if (s == null || !p.sizes) return true; // no size chosen, or one-size item
     return s >= p.sizes[0] && s <= p.sizes[1] && !p.soldOut.includes(s);
   }
   function fitsGender(p, g) {
@@ -84,17 +88,17 @@
     return p.gender === g || p.gender === "u";
   }
   function visible() {
-    let list = PRODUCTS.filter((p) => fitsSize(p, state.size) && fitsGender(p, state.gender) && (state.cat === "all" || p.cat === state.cat));
+    let list = PRODUCTS.filter((p) => fitsSize(p, state.size) && fitsGender(p, state.gender));
     if (state.sort === "up") list = [...list].sort((a, b) => a.price - b.price);
     if (state.sort === "down") list = [...list].sort((a, b) => b.price - a.price);
     return list;
   }
+  const sizedCount = (s) => PRODUCTS.filter((p) => p.sizes && fitsSize(p, s) && fitsGender(p, state.gender)).length;
 
   /* ---------- render ---------- */
   function renderStatic() {
-    const d = I18N[state.lang];
     document.documentElement.lang = state.lang;
-    document.documentElement.dir = d.dir;
+    document.documentElement.dir = I18N[state.lang].dir;
     document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll("[data-i18n-label]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.i18nLabel)));
     document.querySelectorAll(".lang__btn").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
@@ -102,60 +106,101 @@
     $("#city").textContent = L(CFG.city);
   }
 
+  function renderHero() {
+    $("#hero-title").textContent = state.size == null ? t("heroAsk") : t("heroAnswer", state.size, sizedCount(state.size));
+  }
+
   function renderRuler() {
-    const all = `<button type="button" class="tick tick--all" data-size="" aria-pressed="${state.size == null}"><span class="tick__n">${esc(t("rulerAll"))}</span><span class="tick__cm">19–47</span></button>`;
-    $("#ruler").innerHTML = all + RULER_SIZES.map((s) =>
-      `<button type="button" class="tick" data-size="${s}" aria-pressed="${state.size === s}" aria-label="${s} (${footCm(s)} cm)"><span class="tick__n">${s}</span><span class="tick__cm">${footCm(s)}</span></button>`
-    ).join("");
+    const track = $("#ruler");
+    const slider = $("#slider");
+    track.innerHTML = "";
+    track.append(slider);
+    track.insertAdjacentHTML("beforeend",
+      `<button type="button" class="tick tick--all" data-size="" aria-pressed="${state.size == null}"><span class="tick__n">${esc(t("rulerAll"))}</span><span class="tick__cm" dir="ltr">19–47</span></button>` +
+      RULER_SIZES.map((s) => `<button type="button" class="tick" data-size="${s}" aria-pressed="${state.size === s}" aria-label="${s}, ${footCm(s)} cm"><span class="tick__n">${s}</span><span class="tick__cm">${footCm(s)}</span></button>`).join(""));
+    moveSlider(false);
   }
 
-  function renderTypes() {
-    const base = PRODUCTS.filter((p) => fitsSize(p, state.size) && fitsGender(p, state.gender));
-    const count = (id) => base.filter((p) => p.cat === id).length;
-    const chips = [`<button type="button" class="type" data-cat="all" aria-pressed="${state.cat === "all"}">${esc(t("allTypes"))} <span class="type__n">${base.length}</span></button>`];
-    for (const c of CATS) {
-      const sample = PRODUCTS.find((p) => p.cat === c.id);
-      chips.push(`<button type="button" class="type" data-cat="${c.id}" aria-pressed="${state.cat === c.id}">${drawing({ ...sample, colorPick: ["currentColor", "currentColor"] })}<span>${esc(L(c))}</span> <span class="type__n">${count(c.id)}</span></button>`);
-    }
-    $("#types").innerHTML = chips.join("");
+  /* The saffron slider travels to the chosen size: the one moving part of the page. */
+  function moveSlider(animate = true) {
+    const tick = $(`#ruler .tick[aria-pressed="true"]`);
+    const slider = $("#slider");
+    if (!tick) return;
+    if (!animate) slider.style.transition = "none";
+    slider.style.width = tick.offsetWidth + "px";
+    slider.style.transform = `translateX(${tick.offsetLeft}px)`;
+    if (!animate) { void slider.offsetWidth; slider.style.transition = ""; }
+    const sc = $("#ruler-scroll");
+    const target = tick.offsetLeft - (sc.clientWidth - tick.offsetWidth) / 2;
+    sc.scrollTo({ left: document.dir === "rtl" ? target - (sc.scrollWidth - sc.clientWidth) : target, behavior: animate && !reduceMotion.matches ? "smooth" : "auto" });
   }
 
-  function renderGender() {
-    const opts = ["all", "f", "h", "e"];
-    const label = $("#gender-label").outerHTML;
-    $("#gender").innerHTML = label + opts.map((g) =>
-      `<button type="button" data-gender="${g}" aria-pressed="${state.gender === g}">${esc(g === "all" ? t("genderAll") : t("gender_" + g))}</button>`
-    ).join("");
-    $("#gender-label").textContent = t("gender");
-  }
-
-  function renderGrid() {
+  function renderAisles() {
     const list = visible();
-    $("#result-count").textContent = t("results", list.length) + (state.size ? " " + t("inSize", state.size) : "");
-    $("#grid").innerHTML = list.map((p) => {
-      const cat = catOf(p);
-      const sizes = p.sizes ? t("sizesRange", p.sizes[0], p.sizes[1]) : t("oneSize");
-      return `<li class="card">
-        ${p.isNew ? `<span class="badge">${esc(t("newBadge"))}</span>` : ""}
-        <div class="card__img" style="${tint(p.colors[0] === "#F4F4F2" ? p.colors[1] : p.colors[0])}">${drawing(p)}</div>
-        <div class="card__info">
-          <span class="card__cat">${esc(L(cat))}${p.cat === "enfants" ? "" : sep() + esc(t("gender_" + p.gender))}</span>
-          <h3 class="card__name"><button type="button" data-open="${p.id}">${esc(L(p.name))}</button></h3>
-          <div class="card__row"><span class="price">${money(p.price)}</span><span class="label">${esc(sizes)}</span></div>
-        </div>
-      </li>`;
+    $("#aisle-list").innerHTML = FAMILIES.map((f) => {
+      const types = CATS.filter((c) => c.family === f.id);
+      return `<div class="aisle">
+        <h3><a href="#f-${f.id}">${esc(L(f))}</a></h3>
+        <ul>${types.map((c) => {
+          const n = list.filter((p) => p.cat === c.id).length;
+          return n
+            ? `<li><a href="#t-${c.id}">${esc(L(c))}</a><span class="n">${n}</span></li>`
+            : `<li class="is-empty"><span>${esc(L(c))}</span><span class="n">0</span></li>`;
+        }).join("")}</ul>
+      </div>`;
+    }).join("");
+  }
+
+  function renderFilters() {
+    const chip = $("#size-chip");
+    chip.hidden = state.size == null;
+    if (state.size != null) {
+      chip.innerHTML = `${esc(t("sizeChip", state.size))}<button type="button" id="clear-size" aria-label="${esc(t("clearSize"))}"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>`;
+    }
+    $("#gender").setAttribute("aria-label", t("gender"));
+    $("#gender").innerHTML = ["all", "f", "h", "e"].map((g) =>
+      `<button type="button" data-gender="${g}" aria-pressed="${state.gender === g}">${esc(g === "all" ? t("genderAll") : t("gender_" + g))}</button>`).join("");
+    $("#sort").value = state.sort;
+  }
+
+  function itemHtml(p) {
+    const sizes = p.sizes ? `<bdi dir="ltr">${p.sizes[0]}–${p.sizes[1]}</bdi>` : esc(t("oneSize"));
+    return `<li class="item">
+      <div class="item__img">${drawing(p)}</div>
+      <h4 class="item__name"><button type="button" data-open="${p.id}">${esc(L(p.name))}</button></h4>
+      <p class="item__meta">${metaOf(p)}</p>
+      <p class="item__buy"><span class="price">${money(p.price)}</span><span class="item__sizes">${sizes}</span></p>
+    </li>`;
+  }
+
+  function renderShelves() {
+    const list = visible();
+    $("#result-count").textContent = t("results", list.length);
+    $("#shelves").innerHTML = FAMILIES.map((f) => {
+      const types = CATS.filter((c) => c.family === f.id)
+        .map((c) => ({ c, items: list.filter((p) => p.cat === c.id) }))
+        .filter((x) => x.items.length);
+      if (!types.length) return "";
+      const single = types.length === 1 && CATS.filter((c) => c.family === f.id).length === 1;
+      return `<section class="family" id="f-${f.id}" aria-labelledby="fh-${f.id}">
+        <header class="family__head"><h2 id="fh-${f.id}">${esc(L(f))}</h2><p>${esc(L(f.note))}</p></header>
+        ${types.map(({ c, items }) => `<section class="shelf-type" id="t-${c.id}" aria-label="${esc(L(c))}">
+          ${single ? "" : `<h3>${esc(L(c))} <span class="n">${items.length}</span></h3>`}
+          <ul class="shelf">${items.map(itemHtml).join("")}</ul>
+        </section>`).join("")}
+      </section>`;
     }).join("");
     $("#empty").hidden = list.length > 0;
   }
 
   function renderGuide() {
-    $("#guide-rows").innerHTML = range(19, 47).map((s) =>
-      `<tr class="${state.size === s ? "is-current" : ""}"><td>${s}</td><td>${footCm(s)} cm</td></tr>`
-    ).join("");
+    $("#guide-rows").innerHTML = RULER_SIZES.map((s) =>
+      `<tr class="${state.size === s ? "is-current" : ""}"><td>${s}</td><td>${footCm(s)} cm</td></tr>`).join("");
   }
 
+  function renderCatalogue() { renderHero(); renderAisles(); renderFilters(); renderShelves(); renderGuide(); }
   function renderAll() {
-    renderStatic(); renderRuler(); renderTypes(); renderGender(); renderGrid(); renderGuide(); renderCartCount();
+    renderStatic(); renderRuler(); renderCatalogue(); renderCartCount();
     if ($("#cart").open) renderCart();
     if ($("#product").open && current) renderProduct();
   }
@@ -164,32 +209,31 @@
   let current = null; // { p, size, color, qty, error }
   function openProduct(id) {
     const p = byId(id);
-    const size = p.sizes && fitsSize(p, state.size) && state.size != null ? state.size : null;
+    const size = p.sizes && state.size != null && fitsSize(p, state.size) ? state.size : null;
     current = { p, size, color: 0, qty: 1, error: "" };
     renderProduct();
     $("#product").showModal();
   }
   function renderProduct() {
     const { p, size, color, qty, error } = current;
-    const cat = catOf(p);
     const pick = [p.colors[color], p.colors[(color + 1) % p.colors.length]];
     const sizesHtml = p.sizes
       ? `<fieldset><legend>${esc(t("chooseSize"))}</legend><div class="sizes">${range(p.sizes[0], p.sizes[1]).map((s) => {
           const out = p.soldOut.includes(s);
-          return `<button type="button" class="size" data-pick-size="${s}" aria-pressed="${size === s}" ${out ? `disabled aria-label="${s}, ${esc(t("soldOutSize"))}"` : ""}>${s}<small>${footCm(s)}</small></button>`;
+          return `<button type="button" class="size" data-pick-size="${s}" aria-pressed="${size === s}" ${out ? `disabled aria-label="${s}, ${esc(t("soldOutSize"))}"` : `aria-label="${s}, ${footCm(s)} cm"`}><b>${s}</b><small>${footCm(s)}</small></button>`;
         }).join("")}</div><p class="form-error" id="size-error" role="alert">${esc(error)}</p></fieldset>`
       : `<p class="sheet__meta">${esc(t("oneSize"))}</p>`;
     $("#product-body").innerHTML = `
-      <div class="sheet__img" style="${tint(pick[0] === "#F4F4F2" ? pick[1] : pick[0])}">${drawing({ ...p, colorPick: pick })}</div>
+      <div class="sheet__img">${drawing({ ...p, colorPick: pick })}</div>
       <div class="sheet__info">
         <div>
-          <p class="sheet__meta">${esc(L(cat))}${p.cat === "enfants" ? "" : sep() + esc(t("gender_" + p.gender))}</p>
+          <p class="sheet__meta">${esc(L(catOf(p)))}</p>
           <h3 id="p-name">${esc(L(p.name))}</h3>
+          <p class="sheet__meta">${metaOf(p)}</p>
         </div>
-        <p class="sheet__price">${money(p.price)}</p>
+        <p class="sheet__price price">${money(p.price)}</p>
         <fieldset><legend>${esc(t("colour"))}</legend><div class="swatches">${p.colors.map((c, i) =>
           `<button type="button" class="swatch" data-pick-color="${i}" aria-pressed="${color === i}"><i style="background:${c}"></i>${esc(L(COLORS[c]) || c)}</button>`).join("")}</div></fieldset>
-        <p class="sheet__meta">${esc(t("material"))}: ${esc(L(MATS[p.mat]))}</p>
         ${sizesHtml}
         <div class="sheet__actions">
           <div class="stepper" role="group" aria-label="${esc(t("qty"))}">
@@ -222,7 +266,7 @@
     const line = state.cart.find((l) => l.id === id && l.size === size && l.color === color);
     if (line) line.qty = Math.min(9, line.qty + qty); else state.cart.push({ id, size, color, qty });
     saveCart();
-    const n = $("#cart-count"); n.classList.remove("bump"); void n.offsetWidth; n.classList.add("bump");
+    
   }
   function saveCart() { store.set("cart", state.cart); renderCartCount(); if ($("#cart").open) renderCart(); }
   function renderCartCount() { $("#cart-count").textContent = state.cart.reduce((n, l) => n + l.qty, 0); }
@@ -255,7 +299,7 @@
       <ul class="lines">${state.cart.map((l, i) => {
         const p = byId(l.id);
         return `<li class="line">
-          <div class="line__img" style="${tint(l.color === "#F4F4F2" ? "#8C8F9A" : l.color)}">${drawing({ ...p, colorPick: [l.color, p.colors.find((c) => c !== l.color) || l.color] })}</div>
+          <div class="line__img">${drawing({ ...p, colorPick: [l.color, p.colors.find((c) => c !== l.color) || l.color] })}</div>
           <div class="line__info">
             <span class="line__name">${esc(L(p.name))}</span>
             <span class="line__meta">${l.size != null ? `${esc(t("size"))} ${l.size}${sep()}` : ""}${esc(L(COLORS[l.color]) || "")}</span>
@@ -294,7 +338,7 @@
     }
     const r = e.target.closest("[data-remove]");
     if (r) { state.cart.splice(+r.dataset.remove, 1); saveCart(); ($(".line__remove") || $("#cart .icon-btn")).focus(); return; }
-    if (e.target.closest("[data-browse]")) { $("#cart").close(); $("#catalogue").focus(); $("#catalogue").scrollIntoView(); }
+    if (e.target.closest("[data-browse]")) { $("#cart").close(); $("#aisles").focus(); $("#aisles").scrollIntoView(); }
   });
   $("#cart").addEventListener("input", (e) => {
     if (e.target.id === "c-name") state.customer.name = e.target.value;
@@ -306,36 +350,34 @@
 
   /* ---------- page events ---------- */
   $("#open-cart").addEventListener("click", () => { renderCart(); $("#cart").showModal(); });
+  function setSize(s) {
+    state.size = s;
+    document.querySelectorAll("#ruler .tick").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.size ? +b.dataset.size : null) === s)));
+    moveSlider(true);
+    renderCatalogue();
+  }
   $("#ruler").addEventListener("click", (e) => {
     const b = e.target.closest("[data-size]"); if (!b) return;
-    state.size = b.dataset.size ? +b.dataset.size : null;
-    renderRuler(); renderTypes(); renderGrid(); renderGuide();
-    $(`#ruler [data-size="${b.dataset.size}"]`).focus();
+    setSize(b.dataset.size ? +b.dataset.size : null);
   });
-  $("#types").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-cat]"); if (!b) return;
-    state.cat = b.dataset.cat; renderTypes(); renderGrid();
-    $(`#types [data-cat="${state.cat}"]`).focus();
-  });
-  $("#gender").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-gender]"); if (!b) return;
-    state.gender = b.dataset.gender; renderGender(); renderTypes(); renderGrid();
+  $("#filters").addEventListener("click", (e) => {
+    if (e.target.closest("#clear-size")) { setSize(null); $("#ruler .tick--all").focus({ preventScroll: true }); return; }
+    const g = e.target.closest("[data-gender]"); if (!g) return;
+    state.gender = g.dataset.gender; renderCatalogue();
     $(`#gender [data-gender="${state.gender}"]`).focus();
   });
-  $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; renderGrid(); });
-  $("#grid").addEventListener("click", (e) => { const b = e.target.closest("[data-open]"); if (b) openProduct(b.dataset.open); });
-  $("#reset").addEventListener("click", () => {
-    Object.assign(state, { size: null, cat: "all", gender: "all" });
-    renderRuler(); renderTypes(); renderGender(); renderGrid(); renderGuide();
-  });
+  $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; renderShelves(); });
+  $("#shelves").addEventListener("click", (e) => { const b = e.target.closest("[data-open]"); if (b) openProduct(b.dataset.open); });
+  $("#reset").addEventListener("click", () => { state.gender = "all"; setSize(null); });
   document.querySelectorAll(".lang__btn").forEach((b) => b.addEventListener("click", () => {
     state.lang = b.dataset.lang; store.set("lang", state.lang); renderAll();
   }));
   $("#copy-phone").addEventListener("click", async () => {
-    const num = "+" + CFG.whatsapp;
-    try { await navigator.clipboard.writeText(num); toast(t("copied")); }
+    try { await navigator.clipboard.writeText("+" + CFG.whatsapp); toast(t("copied")); }
     catch { const r = document.createRange(); r.selectNodeContents($("#phone")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
   });
+  addEventListener("resize", () => moveSlider(false));
+  document.fonts?.ready.then(() => moveSlider(false));
 
   let toastTimer;
   function toast(msg) {
@@ -343,9 +385,7 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
   }
 
-  // Deep link to a shoe type: index.html#babouches
-  const hash = location.hash.slice(1);
-  if (CATS.some((c) => c.id === hash)) state.cat = hash;
-
   renderAll();
+  // Deep links such as index.html#t-babouches or #f-sport land on the shelf once it exists.
+  if (location.hash.length > 1) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 })();

@@ -12,26 +12,38 @@ window.OMH_CONFIG = {
   freeDeliveryFrom: 500
 };
 
+/* Families group the shoe types like aisles in the shop. Order here = order on the page. */
+window.OMH_FAMILIES = [
+  { id: "ville",   fr: "Ville",              ar: "المدينة",          en: "City",            note: { fr: "Cuir et daim pour le bureau, les sorties, l'hiver.", ar: "جلد وشمواه للعمل والسهرات والشتاء.", en: "Leather and suede for work, evenings and winter." } },
+  { id: "sport",   fr: "Sport",              ar: "الرياضة",          en: "Sport",           note: { fr: "Pour courir, jouer, marcher toute la journée.", ar: "للجري واللعب والمشي طوال اليوم.", en: "For running, playing and walking all day." } },
+  { id: "ete",     fr: "Été",                ar: "الصيف",            en: "Summer",          note: { fr: "Pieds à l'air, pour la plage et la chaleur.", ar: "أحذية مفتوحة للشاطئ والحرارة.", en: "Open shoes for the beach and the heat." } },
+  { id: "soiree",  fr: "Soirée & cérémonie", ar: "السهرات والأعراس", en: "Evening & party", note: { fr: "Talons et ballerines pour les fêtes et les mariages.", ar: "كعب وباليرينا للحفلات والأعراس.", en: "Heels and flats for parties and weddings." } },
+  { id: "maison",  fr: "Maison & tradition", ar: "الدار والتقليدي",  en: "Home & tradition",note: { fr: "Babouches de Fès et pantoufles chaudes.", ar: "البلغة الفاسية وبانطوفات دافئة.", en: "Fes babouches and warm slippers." } },
+  { id: "travail", fr: "Travail",            ar: "الخدمة",           en: "Work",            note: { fr: "Coque de sécurité, semelle antidérapante.", ar: "حماية لمقدمة القدم ونعل مانع للانزلاق.", en: "Safety toe caps and non-slip soles." } },
+  { id: "enfants", fr: "Enfants",            ar: "الأطفال",          en: "Kids",            note: { fr: "Du premier pas à la rentrée, pointures 19 à 38.", ar: "من الخطوات الأولى حتى المدرسة، مقاسات 19 حتى 38.", en: "From first steps to school, sizes 19 to 38." } },
+  { id: "soins",   fr: "Chaussettes & soins",ar: "الجوارب والعناية", en: "Socks & care",    note: { fr: "Ce qui va avec vos chaussures.", ar: "ما يرافق حذاءك.", en: "What goes with your shoes." } }
+];
+
 window.OMH_CATEGORIES = [
-  { id: "sneakers",   shape: "sneaker",    fr: "Baskets",               ar: "سنيكرز",            en: "Sneakers" },
-  { id: "running",    shape: "runner",     fr: "Running",               ar: "أحذية الجري",       en: "Running" },
-  { id: "basketball", shape: "hightop",    fr: "Basketball",            ar: "كرة السلة",         en: "Basketball" },
-  { id: "football",   shape: "cleat",      fr: "Crampons",              ar: "أحذية كرة القدم",   en: "Football boots" },
-  { id: "mocassins",  shape: "loafer",     fr: "Mocassins",             ar: "موكاسان",           en: "Loafers" },
-  { id: "classic",    shape: "oxford",     fr: "Derby & Richelieu",     ar: "أحذية كلاسيكية",    en: "Derby & Oxford" },
-  { id: "bottines",   shape: "chelsea",    fr: "Bottines",              ar: "بوطيات قصيرة",      en: "Ankle boots" },
-  { id: "bottes",     shape: "boot",       fr: "Bottes",                ar: "بوط طويل",          en: "Tall boots" },
-  { id: "talons",     shape: "heel",       fr: "Escarpins & talons",    ar: "كعب عالي",          en: "Heels" },
-  { id: "sandales",   shape: "sandal",     fr: "Sandales",              ar: "صنادل",             en: "Sandals" },
-  { id: "claquettes", shape: "slide",      fr: "Claquettes & tongs",    ar: "شلاكات",            en: "Slides & flip-flops" },
-  { id: "babouches",  shape: "babouche",   fr: "Babouches",             ar: "بلاغي",             en: "Babouches" },
-  { id: "ballerines", shape: "ballet",     fr: "Ballerines",            ar: "باليرينا",          en: "Ballet flats" },
-  { id: "espadrilles",shape: "espadrille", fr: "Espadrilles",           ar: "إسبادري",           en: "Espadrilles" },
-  { id: "mules",      shape: "mule",       fr: "Mules",                 ar: "ميول",              en: "Mules" },
-  { id: "securite",   shape: "safety",     fr: "Sécurité & travail",    ar: "أحذية العمل",       en: "Safety & work" },
-  { id: "pantoufles", shape: "slipper",    fr: "Pantoufles",            ar: "بانطوفة",           en: "Slippers" },
-  { id: "enfants",    shape: "kids",       fr: "Enfants",               ar: "أحذية الأطفال",     en: "Kids" },
-  { id: "accessoires",shape: "care",       fr: "Chaussettes & soins",   ar: "جوارب ومنتجات العناية", en: "Socks & care" }
+  { id: "sneakers", family: "sport",   shape: "sneaker",    fr: "Baskets",               ar: "سنيكرز",            en: "Sneakers" },
+  { id: "running", family: "sport",    shape: "runner",     fr: "Running",               ar: "أحذية الجري",       en: "Running" },
+  { id: "basketball", family: "sport", shape: "hightop",    fr: "Basketball",            ar: "كرة السلة",         en: "Basketball" },
+  { id: "football", family: "sport",   shape: "cleat",      fr: "Crampons",              ar: "أحذية كرة القدم",   en: "Football boots" },
+  { id: "mocassins", family: "ville",  shape: "loafer",     fr: "Mocassins",             ar: "موكاسان",           en: "Loafers" },
+  { id: "classic", family: "ville",    shape: "oxford",     fr: "Derby & Richelieu",     ar: "أحذية كلاسيكية",    en: "Derby & Oxford" },
+  { id: "bottines", family: "ville",   shape: "chelsea",    fr: "Bottines",              ar: "بوطيات قصيرة",      en: "Ankle boots" },
+  { id: "bottes", family: "ville",     shape: "boot",       fr: "Bottes",                ar: "بوط طويل",          en: "Tall boots" },
+  { id: "talons", family: "soiree",     shape: "heel",       fr: "Escarpins & talons",    ar: "كعب عالي",          en: "Heels" },
+  { id: "sandales", family: "ete",   shape: "sandal",     fr: "Sandales",              ar: "صنادل",             en: "Sandals" },
+  { id: "claquettes", family: "ete", shape: "slide",      fr: "Claquettes & tongs",    ar: "شلاكات",            en: "Slides & flip-flops" },
+  { id: "babouches", family: "maison",  shape: "babouche",   fr: "Babouches",             ar: "بلاغي",             en: "Babouches" },
+  { id: "ballerines", family: "soiree", shape: "ballet",     fr: "Ballerines",            ar: "باليرينا",          en: "Ballet flats" },
+  { id: "espadrilles", family: "ete",shape: "espadrille", fr: "Espadrilles",           ar: "إسبادري",           en: "Espadrilles" },
+  { id: "mules", family: "ete",      shape: "mule",       fr: "Mules",                 ar: "ميول",              en: "Mules" },
+  { id: "securite", family: "travail",   shape: "safety",     fr: "Sécurité & travail",    ar: "أحذية العمل",       en: "Safety & work" },
+  { id: "pantoufles", family: "maison", shape: "slipper",    fr: "Pantoufles",            ar: "بانطوفة",           en: "Slippers" },
+  { id: "enfants", family: "enfants",    shape: "kids",       fr: "Enfants",               ar: "أحذية الأطفال",     en: "Kids" },
+  { id: "accessoires", family: "soins",shape: "care",       fr: "Chaussettes & soins",   ar: "جوارب ومنتجات العناية", en: "Socks & care" }
 ];
 
 window.OMH_MATERIALS = {
