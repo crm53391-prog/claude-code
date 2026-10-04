@@ -2,6 +2,7 @@
 -- Run this whole file once in Supabase: SQL Editor > New query > paste > Run.
 -- Then create the admin account in Authentication > Users > Add user,
 -- and turn off public sign-ups in Authentication > Providers > Email ("Allow new users to sign up").
+-- Then run 02_admin_only.sql with the admin e-mail: only that account can change the shop.
 
 create extension if not exists pgcrypto;
 

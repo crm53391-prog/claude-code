@@ -4,8 +4,11 @@
    - demo mode otherwise: everything is kept in this browser (IndexedDB) */
 (() => {
   const cfg = window.OMH_SUPABASE || {};
-  const live = Boolean(cfg.url && cfg.anonKey && window.supabase);
-  const sb = live ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+  /* Once keys are set the shop is live for good: if the Supabase library failed to load,
+     every call fails with a clear message instead of silently showing an empty demo shop. */
+  const live = Boolean(cfg.url && cfg.anonKey);
+  const sb = live && window.supabase ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+  if (live && !sb) console.error("OMH: supabase-js did not load (vendor/supabase.js).");
 
   const DEFAULT_SETTINGS = {
     whatsapp: "", city: "", announcement: "", hero_url: "", hero_type: "image",
@@ -60,6 +63,14 @@
   channel?.addEventListener("message", () => listeners.forEach((f) => f()));
 
   function must(res) { if (res.error) throw new Error(res.error.message); return res.data; }
+  const OFFLINE = "Connexion à la boutique impossible. Vérifiez votre connexion internet et rechargez la page.";
+  if (live && !sb) {
+    // Same API, every call rejects: the pages show their error state.
+    window.OMH_DATA = new Proxy({ live: true, onChange() {} }, {
+      get: (t, k) => (k in t ? t[k] : () => Promise.reject(new Error(OFFLINE)))
+    });
+    return;
+  }
 
   /* ---------- image helpers ---------- */
   function readAsDataURL(file) {

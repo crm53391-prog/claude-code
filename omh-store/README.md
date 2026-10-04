@@ -17,9 +17,10 @@ Tant que `js/config.js` est vide, le site tourne en **mode démo**. Tout ce qui 
 2. **Base de données** : ouvrez *SQL Editor > New query*, collez tout le fichier `supabase/schema.sql`, puis cliquez sur *Run*.
 3. **Compte admin** : *Authentication > Users > Add user*, avec l'e-mail et le mot de passe du propriétaire.
 4. **Fermer les inscriptions** : *Authentication > Providers > Email*, puis décochez « Allow new users to sign up ». Ainsi, seul le compte admin peut modifier la boutique.
-5. **Clés** : *Project Settings > API*. Copiez « Project URL » et la clé « anon public » dans `js/config.js`.
-6. **Hébergement** : déposez le dossier `omh-store` sur Netlify, Vercel ou GitHub Pages. C'est un site statique, sans build.
-7. Ouvrez `votre-site/admin.html`, connectez-vous, puis remplissez les Réglages (numéro WhatsApp) et ajoutez vos rayons et produits.
+5. **Réserver l'admin** : ouvrez `supabase/02_admin_only.sql`, remplacez `ADMIN@EMAIL.COM` par l'e-mail du compte admin, puis exécutez-le dans *SQL Editor*. Seul ce compte peut alors modifier la boutique.
+6. **Clés** : *Project Settings > API*. Copiez « Project URL » et la clé « anon public » dans `js/config.js`.
+7. **Hébergement** : déposez le dossier `omh-store` sur Netlify, Vercel ou GitHub Pages. C'est un site statique, sans build.
+8. Ouvrez `votre-site/admin.html`, connectez-vous, puis remplissez les Réglages (numéro WhatsApp) et ajoutez vos rayons et produits.
 
 La clé « anon public » peut être publique : les règles de sécurité de `schema.sql` empêchent les visiteurs de modifier quoi que ce soit. Ils peuvent seulement lire la boutique, laisser un avis et enregistrer une commande.
 
