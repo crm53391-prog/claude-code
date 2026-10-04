@@ -1,23 +1,44 @@
 # OMH, boutique de chaussures
 
-Site vitrine statique (HTML/CSS/JS, sans build) en français, arabe et anglais.
-Le client choisit un modèle, sa pointure et sa couleur, remplit son panier, puis envoie la commande sur WhatsApp.
+Site boutique en français, arabe et anglais, avec un espace admin.
 
-Ouvrir `index.html` dans un navigateur suffit. Pour tester en local : `python3 -m http.server` dans ce dossier.
+- **La boutique (`index.html`)** : grande photo ou vidéo d'accueil qui s'agrandit au défilement, rayons, recherche, nouveautés, promos, favoris, avis clients avec étoiles, panier, et commande sur WhatsApp avec paiement à la livraison.
+- **L'admin (`admin.html`)** : le propriétaire crée ses rayons et ses produits (nom, prix, ancien prix pour une promo, photos, pointures et stock, couleurs). Il suit les commandes, gère les avis et règle le numéro WhatsApp, le bandeau du haut et l'image ou la vidéo d'accueil.
 
-## Modifier la boutique
+Le site ne contient aucun produit au départ : tout vient de l'admin.
 
-Tout se fait dans `products.js` :
+## Mode démo
 
-- `OMH_CONFIG.whatsapp` : le numéro WhatsApp de la boutique, format international sans `+` (ex. `212612345678`).
-- `OMH_CONFIG.city`, `currency`, `freeDeliveryFrom` : ville, devise, seuil de livraison offerte.
-- `OMH_FAMILIES` : les rayons (Ville, Sport, Été…) et leur phrase d'accroche.
-- `OMH_CATEGORIES` : les types de chaussures, chacun rattaché à un rayon (`family`).
-- `OMH_PRODUCTS` : un objet par modèle (`name` en 3 langues, `cat`, `gender` h/f/e/u, `price`, `sizes` [min, max], `soldOut`, `colors`, `mat`, `isNew`).
-- `OMH_COLORS` : le nom de chaque couleur dans les 3 langues.
+Tant que `js/config.js` est vide, le site tourne en **mode démo**. Tout ce qui est ajouté dans l'admin reste dans le navigateur, ce qui suffit pour essayer. Pour que les clients voient les produits, il faut brancher Supabase.
 
-Les textes de l'interface sont dans `i18n.js`. Les dessins de chaussures sont temporaires, en attendant les vraies photos.
+## Mettre en ligne avec Supabase (gratuit)
 
-Lien direct vers un rayon ou un type : `index.html#f-sport`, `index.html#t-babouches`, etc.
+1. Créez un compte sur https://supabase.com, puis un nouveau projet.
+2. **Base de données** : ouvrez *SQL Editor > New query*, collez tout le fichier `supabase/schema.sql`, puis cliquez sur *Run*.
+3. **Compte admin** : *Authentication > Users > Add user*, avec l'e-mail et le mot de passe du propriétaire.
+4. **Fermer les inscriptions** : *Authentication > Providers > Email*, puis décochez « Allow new users to sign up ». Ainsi, seul le compte admin peut modifier la boutique.
+5. **Clés** : *Project Settings > API*. Copiez « Project URL » et la clé « anon public » dans `js/config.js`.
+6. **Hébergement** : déposez le dossier `omh-store` sur Netlify, Vercel ou GitHub Pages. C'est un site statique, sans build.
+7. Ouvrez `votre-site/admin.html`, connectez-vous, puis remplissez les Réglages (numéro WhatsApp) et ajoutez vos rayons et produits.
 
-Les choix de design (couleurs, polices, mise en page) sont expliqués dans `DESIGN.md`.
+La clé « anon public » peut être publique : les règles de sécurité de `schema.sql` empêchent les visiteurs de modifier quoi que ce soit. Ils peuvent seulement lire la boutique, laisser un avis et enregistrer une commande.
+
+## Fichiers
+
+| Fichier | Rôle |
+|---|---|
+| `index.html`, `css/store.css`, `js/store.js` | la boutique |
+| `admin.html`, `css/admin.css`, `js/admin.js` | l'espace admin |
+| `js/data.js` | lecture et écriture des données (Supabase, ou navigateur en mode démo) |
+| `js/i18n.js` | textes de la boutique en FR / AR / EN |
+| `js/config.js` | clés Supabase |
+| `supabase/schema.sql` | tables, sécurité et stockage des photos |
+| `DESIGN.md` | choix de design (couleurs, polices, mise en page) |
+
+---
+
+## بالعربية باختصار
+
+- الموقع كيبدا خاوي، والأدمين هو اللي كيزيد الأقسام والمنتجات من `admin.html`.
+- باش الزبناء يشوفو المنتجات: دير حساب فـ Supabase، شغّل `supabase/schema.sql`، زيد حساب الأدمين، وحط Project URL و anon key فـ `js/config.js`.
+- من بعد، حط الدوسي فـ Netlify أو Vercel.

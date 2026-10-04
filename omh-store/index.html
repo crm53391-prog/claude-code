@@ -4,118 +4,105 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>OMH Chaussures</title>
-<meta name="description" content="OMH, boutique de chaussures : baskets, babouches, talons, bottes, sandales, enfants. Commande sur WhatsApp, paiement à la livraison.">
+<meta name="description" content="OMH, boutique de chaussures au Maroc. Commande sur WhatsApp, paiement à la livraison.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Readex+Pro:wght@300..600&family=Reem+Kufi:wght@500..700&display=swap">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/store.css">
 </head>
 <body>
 <!--OMH-BODY-START-->
-<a class="skip" href="#shelves" data-i18n="skip">Aller au catalogue</a>
+<a class="skip" href="#products" data-i18n="skip">Aller aux produits</a>
 
-<header class="top">
-  <div class="top__inner wrap">
-    <a class="logo" href="#top" aria-label="OMH">OMH</a>
-    <nav class="top__nav" aria-label="Menu">
-      <a href="#aisles" data-i18n="navCatalogue">Catalogue</a>
-      <a href="#pointures" data-i18n="navSizes">Guide des pointures</a>
-      <a href="#boutique" data-i18n="navShop">Boutique</a>
-    </nav>
+<p class="announce" id="announce" hidden></p>
+
+<header class="top" id="top">
+  <div class="top__inner">
+    <a class="logo" href="#" aria-label="OMH">OMH</a>
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="visually-hidden" data-i18n="search">Rechercher</span>
+      <input id="q" type="search" autocomplete="off" data-i18n-ph="search">
+    </label>
     <div class="top__tools">
       <div class="lang" role="group" aria-label="Langue / اللغة / Language">
-        <button type="button" class="lang__btn" data-lang="fr" lang="fr">FR</button>
-        <button type="button" class="lang__btn" data-lang="ar" lang="ar">ع</button>
-        <button type="button" class="lang__btn" data-lang="en" lang="en">EN</button>
+        <button type="button" data-lang="fr" lang="fr">FR</button>
+        <button type="button" data-lang="ar" lang="ar">ع</button>
+        <button type="button" data-lang="en" lang="en">EN</button>
       </div>
+      <button type="button" class="icon-btn" id="open-favs" data-i18n-label="favourites">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="count" id="fav-count" hidden></span>
+      </button>
       <button type="button" class="cart-btn" id="open-cart" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-        <span class="cart-btn__label" data-i18n="cart">Panier</span>
-        <span class="cart-btn__count" id="cart-count">0</span>
+        <span data-i18n="cart">Panier</span><span class="cart-btn__n" id="cart-count">0</span>
       </button>
     </div>
   </div>
 </header>
 
-<main id="top">
-  <section class="hero wrap" aria-labelledby="hero-title">
-    <h1 id="hero-title" class="hero__title" aria-live="polite"></h1>
-    <div class="plate">
-      <div class="plate__scroll" id="ruler-scroll">
-        <div class="plate__track" id="ruler" role="group" aria-labelledby="hero-title">
-          <span class="plate__slider" id="slider" aria-hidden="true"></span>
-        </div>
+<main>
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <div class="hero__frame" id="hero-frame">
+      <div class="hero__media" id="hero-media"></div>
+      <div class="hero__copy">
+        <h1 class="hero__title" id="hero-title">OMH</h1>
+        <p class="hero__text" id="hero-text"></p>
       </div>
-    </div>
-    <div class="hero__foot">
-      <p class="hero__text" data-i18n="heroText"></p>
-      <p class="hero__hint" data-i18n="rulerHint"></p>
     </div>
   </section>
 
-  <nav class="aisles wrap" id="aisles" aria-labelledby="aisles-title" tabindex="-1">
-    <h2 id="aisles-title" class="visually-hidden" data-i18n="aisles">Rayons</h2>
-    <div class="aisles__grid" id="aisle-list"></div>
-  </nav>
+  <section class="rayons" id="rayons" aria-labelledby="rayons-title" hidden>
+    <h2 class="section-title" id="rayons-title" data-i18n="sections">Rayons</h2>
+    <ul class="rayons__list" id="rayons-list"></ul>
+  </section>
 
-  <div class="filters" id="filters">
-    <div class="filters__inner wrap">
-      <div class="filters__left">
-        <span class="chip" id="size-chip" hidden></span>
-        <div class="seg" id="gender" role="group"></div>
-      </div>
-      <div class="filters__right">
-        <p class="filters__count" id="result-count" aria-live="polite"></p>
+  <section class="shop" id="products" aria-labelledby="shop-title" tabindex="-1">
+    <div class="toolbar" id="toolbar">
+      <h2 class="visually-hidden" id="shop-title" data-i18n="all">Tout</h2>
+      <div class="views" id="views" role="group"></div>
+      <div class="toolbar__right">
+        <p class="toolbar__count" id="count" aria-live="polite"></p>
         <label class="sort" for="sort">
           <span data-i18n="sort">Trier</span>
           <select id="sort">
-            <option value="popular" data-i18n="sortPopular">Sélection OMH</option>
-            <option value="up" data-i18n="sortPriceUp">Prix croissant</option>
-            <option value="down" data-i18n="sortPriceDown">Prix décroissant</option>
+            <option value="new" data-i18n="sortNew"></option>
+            <option value="up" data-i18n="sortUp"></option>
+            <option value="down" data-i18n="sortDown"></option>
+            <option value="rated" data-i18n="sortRated"></option>
           </select>
         </label>
       </div>
     </div>
-  </div>
+    <ul class="grid" id="grid"></ul>
+    <div class="empty" id="empty" hidden></div>
+  </section>
 
-  <div class="shelves wrap" id="shelves" tabindex="-1"></div>
-  <div class="empty wrap" id="empty" hidden>
-    <p class="empty__title" data-i18n="emptyTitle"></p>
-    <p data-i18n="emptyText"></p>
-    <button type="button" class="btn btn--line" id="reset" data-i18n="emptyReset">Effacer les filtres</button>
-  </div>
+  <section class="voices" id="voices" aria-labelledby="voices-title" hidden>
+    <h2 class="section-title" id="voices-title" data-i18n="reviewsTitle">Ce que disent nos clients</h2>
+    <ul class="voices__list" id="voices-list"></ul>
+  </section>
 
-  <div class="info wrap">
-    <section id="pointures" class="guide" aria-labelledby="guide-title">
-      <h2 id="guide-title" data-i18n="sizeGuideTitle">Trouver sa pointure</h2>
-      <p data-i18n="sizeGuideText"></p>
-      <div class="guide__table">
-        <table>
-          <thead><tr><th scope="col" data-i18n="euSize">Pointure EU</th><th scope="col" data-i18n="footLength">Longueur du pied</th></tr></thead>
-          <tbody id="guide-rows"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="boutique" class="shop" aria-labelledby="shop-title">
-      <h2 id="shop-title" data-i18n="contactTitle">La boutique</h2>
-      <p data-i18n="contactText"></p>
-      <p class="shop__phone" id="phone"></p>
-      <p class="shop__line">
-        <button type="button" class="btn btn--line" id="copy-phone" data-i18n="copy">Copier le numéro</button>
-        <span class="shop__city" id="city"></span>
-      </p>
-    </section>
-  </div>
+  <ul class="perks" id="perks"></ul>
 </main>
 
-<footer class="foot wrap">
-  <span class="logo logo--small">OMH</span>
-  <span data-i18n="footer"></span>
+<footer class="foot">
+  <div class="foot__brand">
+    <span class="foot__logo">OMH</span>
+    <p data-i18n="footerLine"></p>
+  </div>
+  <div class="foot__contact">
+    <h2 data-i18n="contact">Contact</h2>
+    <p id="foot-phone" class="foot__phone"></p>
+    <p id="foot-city"></p>
+    <p id="foot-insta"></p>
+  </div>
+  <p class="foot__admin"><a href="admin.html" data-i18n="admin">Espace admin</a></p>
+  <p class="foot__demo" id="demo-note" hidden data-i18n="demo"></p>
 </footer>
 
 <dialog class="sheet" id="product" aria-labelledby="p-name">
-  <form method="dialog" class="sheet__close"><button class="icon-btn" aria-label="Fermer" data-i18n-label="close">
+  <form method="dialog" class="sheet__close"><button class="icon-btn icon-btn--solid" data-i18n-label="close">
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button></form>
   <div class="sheet__body" id="product-body"></div>
@@ -124,7 +111,7 @@
 <dialog class="drawer" id="cart" aria-labelledby="cart-title">
   <div class="drawer__head">
     <h2 id="cart-title" data-i18n="cartTitle">Votre panier</h2>
-    <form method="dialog"><button class="icon-btn" aria-label="Fermer" data-i18n-label="close">
+    <form method="dialog"><button class="icon-btn" data-i18n-label="close">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button></form>
   </div>
@@ -134,8 +121,10 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <!--OMH-BODY-END-->
 
-<script src="products.js"></script>
-<script src="i18n.js"></script>
-<script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/store.js"></script>
 </body>
 </html>

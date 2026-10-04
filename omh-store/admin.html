@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OMH Admin</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/store.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<header class="a-top">
+  <a class="logo" href="index.html">OMH</a>
+  <span class="a-top__label">Admin</span>
+  <nav class="a-tabs" id="tabs" aria-label="Sections de l'admin">
+    <button type="button" data-tab="products">Produits</button>
+    <button type="button" data-tab="categories">Rayons</button>
+    <button type="button" data-tab="orders">Commandes <span class="count-pill" id="new-orders" hidden></span></button>
+    <button type="button" data-tab="reviews">Avis</button>
+    <button type="button" data-tab="settings">Réglages</button>
+  </nav>
+  <div class="a-top__right">
+    <a href="index.html" target="_blank" rel="noopener">Voir la boutique</a>
+    <button type="button" class="link-btn" id="logout" hidden>Se déconnecter</button>
+  </div>
+</header>
+
+<p class="a-demo" id="demo" hidden>Mode démo : tout ce que vous ajoutez reste dans ce navigateur. Branchez Supabase (voir README) pour que vos clients voient vos produits.</p>
+
+<main class="a-main" id="main">
+  <section class="a-login" id="login" hidden>
+    <h1>Connexion</h1>
+    <form id="login-form" class="a-form" novalidate>
+      <label class="field" for="l-email">E-mail<input id="l-email" type="email" autocomplete="username" required></label>
+      <label class="field" for="l-pass">Mot de passe<input id="l-pass" type="password" autocomplete="current-password" required></label>
+      <p class="hint hint--error" id="login-error" role="alert"></p>
+      <button class="btn" type="submit">Se connecter</button>
+    </form>
+  </section>
+  <div id="view"></div>
+</main>
+
+<dialog class="a-dialog" id="editor" aria-labelledby="editor-title">
+  <form method="dialog" class="sheet__close"><button class="icon-btn" aria-label="Fermer">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button></form>
+  <div id="editor-body"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
