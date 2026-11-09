@@ -1,0 +1,845 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>كراسة الطب S3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Noto+Naskh+Arabic:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a bound codex — fixed rubric binding rule at the spine edge, one
+   measured text column, and a margin column that carries the opinion card on
+   wide screens and folds under the notes on narrow ones. */
+:root{
+  --paper:#EDEEE8; --leaf:#F7F8F3; --leaf-2:#E6E8E0;
+  --ink:#1B2027; --ink-soft:#56606E; --ink-faint:#8B94A0;
+  --rule:#D3D6CC; --rule-soft:#E0E2D9;
+  --rubric:#8C2B2B; --indigo:#2C4470;
+  --todo:#9099A4; --doing:#8E6517; --done:#3F6B4E;
+  --c1:#2F4573; --c2:#7A3236; --c3:#43603C; --c4:#7A5A22; --c5:#2F5F63; --c6:#5A3A60;
+  --serif:'Spectral','Noto Naskh Arabic','Iowan Old Style',Georgia,serif;
+  --naskh:'Noto Naskh Arabic','Spectral','Geeza Pro','Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --measure:66ch;
+  --shadow:0 1px 2px rgba(27,32,39,.05),0 8px 24px -14px rgba(27,32,39,.18);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#13171C; --leaf:#1A1F26; --leaf-2:#222831;
+  --ink:#E6E4DB; --ink-soft:#A6AEB9; --ink-faint:#737D8A;
+  --rule:#2E353F; --rule-soft:#232A32;
+  --rubric:#CB6F6B; --indigo:#8AA6DC;
+  --todo:#6C7684; --doing:#C79A48; --done:#7CA98A;
+  --c1:#8AA6DC; --c2:#D8898C; --c3:#9CBE92; --c4:#D7B46A; --c5:#86BDC0; --c6:#BE96C4;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -16px rgba(0,0,0,.7);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#13171C; --leaf:#1A1F26; --leaf-2:#222831;
+  --ink:#E6E4DB; --ink-soft:#A6AEB9; --ink-faint:#737D8A;
+  --rule:#2E353F; --rule-soft:#232A32;
+  --rubric:#CB6F6B; --indigo:#8AA6DC;
+  --todo:#6C7684; --doing:#C79A48; --done:#7CA98A;
+  --c1:#8AA6DC; --c2:#D8898C; --c3:#9CBE92; --c4:#D7B46A; --c5:#86BDC0; --c6:#BE96C4;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -16px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--serif); font-size:17px; line-height:1.62;
+  direction:rtl; text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  padding-left:max(18px,env(safe-area-inset-left,0px));
+  padding-right:max(18px,env(safe-area-inset-right,0px));
+  padding-block:0 4rem;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--paper)}
+::selection{background:color-mix(in srgb,var(--rubric) 22%,transparent)}
+
+/* ── binding rule ─────────────────────────────────────────── */
+.spine{position:fixed;inset-block:0;inset-inline-start:0;width:max(10px,env(safe-area-inset-left,0px));z-index:1;pointer-events:none;
+  background:linear-gradient(to left,color-mix(in srgb,var(--rubric) 10%,transparent),transparent)}
+@media (max-width:780px){.spine{display:none}}
+
+/* ── chrome ───────────────────────────────────────────────── */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:19;background:var(--paper);
+  display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  padding-block:.85rem .7rem;border-bottom:1px solid var(--rule);margin-bottom:2.2rem}
+.brand{font-family:var(--naskh);font-weight:700;font-size:1.02rem;letter-spacing:.01em;
+  margin:0;line-height:1.2;white-space:nowrap}
+.brand b{color:var(--rubric);font-weight:700}
+.bar nav{display:flex;gap:.1rem;margin-inline-start:auto;align-items:center}
+.nlink{font-family:var(--naskh);font-size:.84rem;color:var(--ink-soft);text-decoration:none;
+  padding:.3rem .62rem;border-radius:2px;border:1px solid transparent}
+.nlink:hover{color:var(--ink);background:var(--leaf)}
+.nlink[aria-current="page"]{color:var(--rubric);border-color:var(--rule)}
+.tgl{background:none;border:1px solid var(--rule);color:var(--ink-soft);border-radius:2px;
+  padding:.3rem .45rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.tgl:hover{color:var(--ink);border-color:var(--ink-faint)}
+
+main{max-width:min(70rem,100%);margin:0 auto}
+a{color:var(--indigo)}
+:focus-visible{outline:2px solid var(--rubric);outline-offset:2px}
+
+/* ── shared type ──────────────────────────────────────────── */
+.eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 0 .55rem}
+.lat{font-family:var(--serif);font-feature-settings:"liga" 1}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+.ar{font-family:var(--naskh)}
+.ornament{display:block;text-align:center;color:var(--rubric);opacity:.6;margin:2.2rem 0;
+  font-size:.9rem;letter-spacing:.9em}
+
+/* ── frontispiece ─────────────────────────────────────────── */
+.front{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.5rem 2.5rem;align-items:end;
+  padding-bottom:1.4rem;border-bottom:2px solid var(--rubric);margin-bottom:.5rem}
+.front h1{font-family:var(--naskh);font-size:clamp(1.9rem,6vw,2.9rem);font-weight:700;line-height:1.15}
+.front h1 span{color:var(--rubric)}
+.sub{color:var(--ink-soft);font-family:var(--naskh);font-size:1rem;margin:.5rem 0 0;max-width:46ch}
+.tally{text-align:center;min-width:8.5rem}
+.tally .big{font-family:var(--mono);font-size:2.9rem;line-height:1;font-variant-numeric:tabular-nums;
+  display:block;color:var(--ink)}
+.tally .of{font-family:var(--mono);font-size:.76rem;color:var(--ink-faint);letter-spacing:.1em}
+.tally .cap{font-family:var(--naskh);font-size:.8rem;color:var(--ink-soft);margin-top:.35rem}
+@media (max-width:620px){.front{grid-template-columns:1fr}.tally{text-align:start;min-width:0}}
+
+.meter{height:3px;background:var(--rule-soft);border-radius:99px;overflow:hidden;margin:.6rem 0 0}
+.meter i{display:block;height:100%;background:var(--accent,var(--rubric));transition:width .45s ease}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+
+.legend{display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;margin:1.1rem 0 0;
+  font-family:var(--naskh);font-size:.85rem;color:var(--ink-soft)}
+.legend b{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);font-weight:500}
+.dot{display:inline-block;width:.52em;height:.52em;border-radius:99px;margin-inline-end:.4em;
+  vertical-align:.04em;background:currentColor}
+.s0{color:var(--todo)}.s1{color:var(--doing)}.s2{color:var(--done)}
+
+/* ── strip: search + exam ─────────────────────────────────── */
+.strip{display:flex;gap:.8rem 1.6rem;flex-wrap:wrap;align-items:flex-end;margin:1.9rem 0 .4rem}
+.field{flex:1 1 17rem;min-width:0}
+.field label{display:block;font-family:var(--naskh);font-size:.82rem;
+  color:var(--ink-faint);margin-bottom:.3rem}
+input[type="search"],input[type="date"],input[type="text"]{
+  width:100%;background:var(--leaf);border:1px solid var(--rule);border-radius:2px;
+  color:var(--ink);font-family:var(--naskh);font-size:.95rem;padding:.5rem .7rem}
+input[type="search"]::placeholder{color:var(--ink-faint)}
+.countdown{font-family:var(--naskh);font-size:.88rem;color:var(--ink-soft);white-space:nowrap;padding-bottom:.55rem}
+.countdown b{font-family:var(--mono);color:var(--rubric);font-variant-numeric:tabular-nums}
+
+/* ── chapter cards ────────────────────────────────────────── */
+.shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);margin:1.6rem 0 0}
+@media (max-width:880px){.shelf{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:540px){.shelf{grid-template-columns:1fr}}
+.chap{background:var(--leaf);padding:1.25rem 1.3rem 1.35rem;text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;gap:.1rem;min-width:0;position:relative;transition:background .18s}
+.chap:hover{background:var(--leaf-2)}
+.chap .rn{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;color:var(--accent);margin-bottom:.5rem}
+.chap h3{font-family:var(--serif);font-size:1.12rem;font-weight:600;line-height:1.3}
+.chap .arname{font-family:var(--naskh);font-size:.85rem;color:var(--ink-soft);margin-top:.15rem}
+.chap .foot{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem;
+  margin-top:.95rem;font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);
+  font-variant-numeric:tabular-nums}
+.chap .pct{color:var(--accent)}
+
+/* ── saved / marked rows ──────────────────────────────────── */
+.block{margin:3rem 0 0}
+.block > h2{font-family:var(--naskh);font-size:1.12rem;font-weight:700;display:flex;align-items:baseline;gap:.6rem}
+.block > h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+.hint{font-family:var(--naskh);font-size:.87rem;color:var(--ink-faint);margin:.5rem 0 0}
+
+.rows{list-style:none;margin:.9rem 0 0;padding:0}
+.rows li{border-bottom:1px solid var(--rule-soft)}
+.row{display:grid;grid-template-columns:2.6rem 1fr auto;gap:.9rem;align-items:center;
+  padding:.62rem .3rem;text-decoration:none;color:inherit;min-width:0}
+.row:hover{background:var(--leaf)}
+.row .n{font-family:var(--mono);font-size:.74rem;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.row .t{min-width:0}
+.row .t .ttl{display:block;overflow-wrap:anywhere}
+.row .t .sub2{font-family:var(--mono);font-size:.7rem;color:var(--ink-faint);display:block;margin-top:.12rem}
+.row .marks{display:flex;align-items:center;gap:.5rem;font-size:.78rem;white-space:nowrap}
+.pen{color:var(--indigo)}
+.star{color:var(--rubric)}
+.diffmark{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;padding:.1rem .35rem;
+  border:1px solid currentColor;border-radius:2px}
+.d1{color:var(--done)}.d2{color:var(--doing)}.d3{color:var(--rubric)}.d4{color:var(--rubric);background:color-mix(in srgb,var(--rubric) 14%,transparent)}
+
+/* ── chapter page ─────────────────────────────────────────── */
+.crumb{font-family:var(--naskh);font-size:.85rem;color:var(--ink-soft);margin:0 0 1.1rem;display:flex;gap:.5rem;align-items:center}
+.crumb a{text-decoration:none;color:var(--ink-soft)}
+.crumb a:hover{color:var(--rubric)}
+.chead{border-bottom:2px solid var(--accent);padding-bottom:1.1rem;margin-bottom:1.6rem}
+.chead h1{font-family:var(--serif);font-size:clamp(1.55rem,4.6vw,2.3rem);font-weight:600;line-height:1.2}
+.chead .arname{font-family:var(--naskh);font-size:1rem;color:var(--ink-soft);margin-top:.3rem}
+.chead .stats{display:flex;flex-wrap:wrap;gap:.3rem 1.3rem;margin-top:.9rem;
+  font-family:var(--mono);font-size:.73rem;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+
+.part{margin:2.3rem 0 0}
+.part > h2{font-family:var(--serif);font-size:1.05rem;font-weight:600;font-style:italic;color:var(--ink-soft);
+  padding-bottom:.4rem;border-bottom:1px solid var(--rule)}
+.prof{margin:1.5rem 0 0}
+.prof > h3{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);font-weight:500;display:flex;align-items:baseline;gap:.55rem}
+.prof > h3::after{content:"";flex:1;height:1px;background:var(--rule-soft)}
+
+/* ── lesson page ──────────────────────────────────────────── */
+.leaf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,19rem);gap:2.2rem;align-items:start}
+@media (max-width:900px){.leaf{grid-template-columns:1fr;gap:2rem}}
+.lhead{padding-bottom:1rem;border-bottom:1px solid var(--rule);margin-bottom:1.3rem}
+.lhead .pre{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:.45rem}
+.lhead h1{font-family:var(--serif);font-size:clamp(1.4rem,4.2vw,2.05rem);font-weight:600;line-height:1.22;
+  overflow-wrap:anywhere}
+.lhead .who{font-family:var(--naskh);font-size:.9rem;color:var(--ink-soft);margin-top:.45rem}
+
+.controls{display:flex;flex-wrap:wrap;gap:1.1rem 1.8rem;margin:0 0 1.6rem}
+.ctl{min-width:0}
+.ctl > span{display:block;font-family:var(--naskh);font-size:.82rem;
+  color:var(--ink-faint);margin-bottom:.38rem}
+.seg{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:var(--leaf)}
+.seg button{appearance:none;background:none;border:0;border-inline-start:1px solid var(--rule);
+  font-family:var(--naskh);font-size:.85rem;color:var(--ink-soft);padding:.4rem .75rem;cursor:pointer;
+  white-space:nowrap;transition:background .15s,color .15s}
+.seg button:first-child{border-inline-start:0}
+.seg button:hover{background:var(--leaf-2);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg.tone button[aria-pressed="true"]{background:var(--tone);color:#fff}
+.seg button:disabled{opacity:.55;cursor:default}
+.markbtn{font-family:var(--naskh);font-size:.85rem;background:var(--leaf);border:1px solid var(--rule);
+  border-radius:2px;color:var(--ink-soft);padding:.4rem .8rem;cursor:pointer}
+.markbtn[aria-pressed="true"]{color:var(--rubric);border-color:var(--rubric)}
+
+/* notes: a ruled leaf with a rubric margin rule */
+.notewrap{background:var(--leaf);border:1px solid var(--rule);box-shadow:var(--shadow);position:relative}
+.notewrap::before{content:"";position:absolute;inset-block:0;inset-inline-start:2.3rem;width:1px;
+  background:color-mix(in srgb,var(--rubric) 35%,transparent);pointer-events:none}
+@media (max-width:520px){.notewrap::before{inset-inline-start:1.5rem}}
+.notebar{display:flex;align-items:center;gap:.7rem;padding-block:.55rem;padding-inline:3.1rem .8rem;
+  border-bottom:1px solid var(--rule-soft);flex-wrap:wrap}
+.notebar h2{font-family:var(--naskh);font-size:.92rem;font-weight:700;margin-inline-end:auto}
+.save{font-family:var(--naskh);font-size:.78rem;color:var(--ink-faint);min-width:5.2rem;text-align:start}
+.save.on{color:var(--done)}
+.notebody{padding-block:1.5rem 2rem;padding-inline:3.1rem 1.4rem}
+@media (max-width:520px){.notebody{padding-inline:2.2rem .9rem}.notebar{padding-inline:2.2rem .7rem}}
+
+textarea{width:100%;min-height:22rem;resize:vertical;background:transparent;border:0;
+  color:var(--ink);font-family:var(--naskh);font-size:1.02rem;line-height:2.05rem;padding:0;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 2.04rem,var(--rule-soft) 2.04rem,var(--rule-soft) 2.05rem);
+  background-attachment:local}
+textarea:focus{outline:none}
+textarea::placeholder{color:var(--ink-faint)}
+.syntax{font-family:var(--mono);font-size:.67rem;color:var(--ink-faint);line-height:1.9;
+  margin:1rem 0 0;padding-top:.7rem;border-top:1px dotted var(--rule)}
+.syntax code{background:var(--leaf-2);padding:.05rem .3rem;border-radius:2px;color:var(--ink-soft)}
+
+/* typeset note */
+.typeset{font-family:var(--naskh);font-size:1.03rem;line-height:1.95;max-width:62ch}
+.typeset > :first-child{margin-top:0}
+.typeset p{margin:0 0 1.05em}
+.typeset p.lede::before{content:"¶";color:var(--rubric);font-family:var(--serif);
+  font-size:.95em;margin-inline-end:.35em;opacity:.8}
+.typeset h3{font-family:var(--naskh);font-size:1.22rem;font-weight:700;margin:1.9em 0 .55em;
+  padding-bottom:.25rem;border-bottom:1px solid var(--rule)}
+.typeset h4{font-family:var(--naskh);font-size:1.02rem;color:var(--rubric);
+  font-weight:700;margin:1.7em 0 .5em}
+.typeset h5{font-family:var(--naskh);font-size:1.02rem;font-weight:700;color:var(--ink-soft);margin:1.4em 0 .4em}
+.typeset ul,.typeset ol{margin:0 0 1.05em;padding-inline-start:1.6em;list-style:none}
+.typeset ol{counter-reset:n}
+.typeset li{margin-bottom:.35em;position:relative}
+.typeset ul li::before{content:"◆";color:var(--rubric);font-size:.58em;opacity:.85;
+  position:absolute;inset-inline-start:-1.7em;top:.72em}
+.typeset ol li{counter-increment:n}
+.typeset ol li::before{content:counter(n) ".";font-family:var(--mono);font-size:.74em;
+  color:var(--rubric);position:absolute;inset-inline-start:-2.1em;top:.3em;
+  font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.typeset blockquote{margin:1.3em 0;padding:.1em 1em;border-inline-start:2px solid var(--rubric);
+  font-style:italic;color:var(--ink-soft)}
+.typeset .flag{margin:1.3em 0;padding:.75em 1em;background:color-mix(in srgb,var(--rubric) 7%,transparent);
+  border:1px solid color-mix(in srgb,var(--rubric) 28%,transparent);border-radius:2px}
+.typeset .flag::before{content:"مهم";display:block;font-family:var(--naskh);font-size:.8rem;
+  font-weight:700;color:var(--rubric);margin-bottom:.15em}
+.typeset mark{background:color-mix(in srgb,var(--doing) 26%,transparent);color:inherit;padding:0 .12em}
+.typeset code{font-family:var(--mono);font-size:.86em;background:var(--leaf-2);padding:.08em .32em;border-radius:2px}
+.typeset strong{font-weight:700}
+.typeset hr{border:0;text-align:center;margin:1.4em 0}
+.typeset hr::before{content:"❖";color:var(--rubric);opacity:.65;letter-spacing:.6em}
+.empty{font-family:var(--naskh);color:var(--ink-faint);font-size:.95rem}
+
+/* margin column cards */
+.card{background:var(--leaf);border:1px solid var(--rule);padding:1rem 1.05rem 1.15rem;margin-bottom:1.1rem}
+.card h2,.card h3{font-family:var(--naskh);font-size:.92rem;font-weight:700;margin-bottom:.1rem}
+.cardhead{display:flex;align-items:baseline;gap:.7rem;justify-content:space-between}
+.card .lab{font-family:var(--naskh);font-size:.82rem;color:var(--ink-faint);margin:.9rem 0 .3rem}
+.card .lab:first-of-type{margin-top:.7rem}
+.minibox{width:100%;min-height:4.6rem;background:transparent;border:1px dashed var(--rule);
+  border-radius:2px;padding:.5rem .6rem;color:var(--ink);font-family:var(--naskh);font-size:.93rem;
+  line-height:1.65;resize:vertical;background-image:none}
+.minibox:focus{border-color:var(--ink-faint);border-style:solid}
+.card .tip{font-family:var(--naskh);font-size:.78rem;color:var(--ink-faint);margin:.55rem 0 0}
+
+.pager{display:flex;justify-content:space-between;gap:1rem;margin:2.6rem 0 0;
+  padding-top:1.1rem;border-top:1px solid var(--rule)}
+.pager a{flex:1 1 0;min-width:0;text-decoration:none;color:inherit;padding:.3rem 0}
+.pager a:last-child{text-align:end}
+.pager .k{display:block;font-family:var(--naskh);font-size:.8rem;color:var(--ink-faint)}
+.pager a:hover .v{color:var(--rubric)}
+.pager .v{font-size:.95rem;display:block;margin-top:.2rem;overflow-wrap:anywhere}
+
+/* ── opinions page ────────────────────────────────────────── */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1.1rem;margin-top:1.1rem}
+.op{background:var(--leaf);border:1px solid var(--rule);border-top:2px solid var(--accent);padding:1.05rem 1.1rem 1.2rem}
+.op h3{font-family:var(--serif);font-size:1.02rem;font-weight:600}
+.op .arname{font-family:var(--naskh);font-size:.82rem;color:var(--ink-faint);margin-top:.1rem}
+.op .txt{font-family:var(--naskh);font-size:.93rem;color:var(--ink-soft);margin:.7rem 0 0;white-space:pre-wrap}
+.quote{font-family:var(--naskh);font-size:.93rem;white-space:pre-wrap;margin:.2rem 0 0;
+  padding-inline-start:.7rem;border-inline-start:2px solid var(--rule)}
+.op .lab-hard,.op .lab-easy{font-family:var(--naskh);font-size:.82rem;font-weight:700;margin:.95rem 0 .25rem}
+.op .lab-hard{color:var(--rubric)}
+.op .lab-easy{color:var(--done)}
+.srclink{font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);text-decoration:none}
+.srclink:hover{color:var(--rubric)}
+.offline{font-family:var(--naskh);font-size:.85rem;color:var(--doing);border:1px solid currentColor;
+  border-radius:2px;padding:.5rem .8rem;margin:1.2rem 0 0;display:none}
+.offline.show{display:block}
+</style>
+
+<div class="spine" aria-hidden="true"></div>
+<div dir="rtl">
+  <header class="bar">
+    <p class="brand">كراسة الطب <b>S3</b></p>
+    <nav>
+      <a class="nlink" href="#fihris" data-v="fihris">الفهرس</a>
+      <a class="nlink" href="#aray" data-v="aray">الآراء</a>
+      <button class="tgl" id="theme" type="button" title="بدّل الثيم" aria-label="بدّل الثيم"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M8 1.6a6.4 6.4 0 0 1 0 12.8Z" fill="currentColor"></path></svg></button>
+    </nav>
+  </header>
+  <main id="view"></main>
+  <p class="offline" id="offline">ما قدرتش نوصل للملاحظات المحفوظين. اللي كتشوف دابا يمكن ماشي آخر نسخة.</p>
+</div>
+
+<script>
+"use strict";
+const RAW = [{"fr":"Anatomie III","ar":"التشريح 3","sections":[{"label":null,"groups":[{"prof":"Pr.Hammoud","courses":["Développement embryonaire du SNC","La moelle spinale","Le cerveau","Le tronc cérébral","Le cervelet","Vascularisation de l'encéphale","Retour Veineux du cerveau"]},{"prof":"Pr.Alami","courses":["Region topographique","Fascias du cou","Larynx","Pharynx","Muscules du cou","Region carotidienne \" contenu artérielles, veineuses, neurveux, lymphatiques \"","Region sus claviculaire \" contenu artérielles, veineuses, neurveux, lymphatiques \"","Glande thyroïde","la nuque","la région parotidienne","la cavité buccale","Cavités nasales","Appareil de vision"]}]}]},{"fr":"Sémiologie I","ar":"السيميولوجيا 1","sections":[{"label":"Sémio de l'appareil locomoteur","groups":[{"prof":"Pr. Idrissi","courses":["Sémiologie de la hanche"]},{"prof":"Pr. Abid","courses":["Généralités sur les fractures","Sémiologie pied et cheville"]},{"prof":"Pr. Boutayeb","courses":["Examen clinique du genou","Examen clinique de l'épaule"]},{"prof":"Pr. Lahrach","courses":["Examen clinique du coude"]}]},{"label":"Sémio Gastro-entérique","groups":[{"prof":"Pr. Abkari","courses":["Sémiologie proctologique","Diarrhées aigues","Hémorragies internes"]},{"prof":"Pr. Lahmidani","courses":["Les ascites","Nausées et vomissements"]},{"prof":"Pr. El Yousfi","courses":["Examen clinique en patho digestive","Douleurs abdominales d'origine digestive"]},{"prof":"Pr. El Mekkaoui","courses":["Constipation","Dysphagie"]},{"prof":"Pr. Bennajeh","courses":["Hémorragies digestives","Le reflux gastro-oesophagien"]},{"prof":"Pr. Lamsiah","courses":["Les hépatomégalies","Les ictères"]}]},{"label":"Sémio visérale","groups":[{"prof":"Pr. Benjelloun","courses":["Les péritonites aigues","Occlusions intestinales aigues"]},{"prof":"Pr. Souiki","courses":["hemoragie interne","Traumatismes de l'abdomen","Hernies et éventrations ( 2 cours)"]}]},{"label":"Sémio cardio-vasculaire","groups":[{"prof":"Pr. Akoudad","courses":["Introduction générale","Douleur thoracique","La dyspnée","La syncope","Le cathétérisme cardiaque","Auscultation","ECG","L'écho-Doppler cardiaque","Examen clinique en cardiologie","La radiographie thoracique en pathologie cardiaque"]}]},{"label":"Sémio respiratoire","groups":[{"prof":"Pr. Amara","courses":["Sémiologie respiratoire (introduction)","douleurs thoraciques","hemoragie interne","la toux","Expectoration","Hemoptysies","L'examen Physique","Les grands syndromes"]}]}]},{"fr":"Physiologie II","ar":"الفيزيولوجيا 2","sections":[{"label":"Physiologie Rénale et Milieu Intérieur","groups":[{"prof":"Pr. El Bardai","courses":["Filtration glomurulaire","Anatomie Microscopique, Histologie et Fonctions des Reins"]},{"prof":"Pr.Allata","courses":["Métabolisme Phospho-Calcique","Equilibre Acido-Basique","Métabolisme du Potassium","Fonctions Endocrines du Rein et Rôle du Rein dans la Régulation de la Pression Artérielle"]},{"prof":"Pr. Chouhani","courses":["Fonctions Tubulaires"]},{"prof":"Pr. ElBardai","courses":["Régulation du Bilan Hydrique","Bilan du Sodium","Compartiments Liquidiens - Milieu Intérieur"]}]},{"label":"Physiologie Neurologique","groups":[{"prof":"Pr. El Midaoui","courses":["Organisation Générale du Système Nerveux","Physiologie de la Motricité","Physiologie de la Somesthésie","Physiologie du Système Nerveux Végétatif"]},{"prof":"Pr. Belahsen","courses":["Système Extra-Pyramidal","Physiologie du Sommeil","Physiologie du Cervelet et des Voies Cérébelleuses","Physiologie de la Mémoire","Physiologie du Langage"]}]},{"label":"Physiologie Endocrinienne","groups":[{"prof":"Pr. Chabir","courses":["Endocrinologie Générale","Physiologie de reproduction","Pancréas Endocrine","Corticosurrénales","Glande ou le Corps Thyroïde","Hormones Hypothalamo-Hypophysaires","Métabolisme Phosphocalcique"]}]}]},{"fr":"Biochimie clinique","ar":"الكيمياء الحيوية السريرية","sections":[{"label":null,"groups":[{"prof":"Pr. El Boukhrissi","courses":["Phase Pré-Analytique et Prélèvement en Biologie Clinique","Métabolisme de l’Eau et des éléctrolytes","Exploration Biochimique de l’Equilibre Acido-Basique","Ionogramme Sanguin","Exploration Biochimique du Métabolisme Phosphocalcique","Exploration Biochimique de la Fonction Rénale: Dosage de l'Urée & la Créatinine","Exploration biochimique du Métabolisme de l’Acide Urique","Exploration Biochimique du Métabolisme du Fer","Protéines Plasmatiques","Exploration Biochimique des Fonctions Hépatiques","Diabète Sucré","Biochimie du Liquide Céphalorachidien","Syndrome Biochimique de l'Infarctus du Myocarde","Exploration biochimique du métabolisme des lipoprotéines"]},{"prof":"Pr.Benbella","courses":["Exploration de la Médullosurrénale","Exploration Biochimique de la thyroide","Exploration biochimique de la grossesse","Exploration biochimique des testicules","Exploration biochimique des ovaires","Exploration Biochimique de la Corticosurrénale"]}]}]},{"fr":"Fonctions vitales et secourisme","ar":"الوظائف الحيوية والإسعافات الأولية","sections":[{"label":"Fonctions Vitales","groups":[{"prof":"Pr. Boukatta","courses":["Transport d'Oxygène","Physiopathologie des Hypoxies","Physiopathologie des Etats de Choc"]},{"prof":"Pr. El Bouazzaoui","courses":["Physiopathologie et Prévention des Infections Associées aux Soins"]},{"prof":"Pr. Derkaoui (Hybride)","courses":["Syndrome de Rhabdomyolyse"]},{"prof":"Pr. Shimi","courses":["HTIC","Physiopathologie de l’asthme aigu grave","Embolie pulmonaire"]},{"prof":"Pr. Harandou","courses":["Hémostase","Insuffisance Hépatique Aiguë","Insuffisance Rénale Aiguë","Homéostasie du Milieu Intérieur","Œdème aigu pulmonaire"]}]},{"label":"Secourisme","groups":[{"prof":"Pr. Harandou","courses":["Arrêt Cardiaque Extra-hopitalier Chez l’Adulte"]},{"prof":"Pr. El Bouazzaoui","courses":["Obstruction Accidentelle des VAS par un Corps Etranger","Victime Inconsciente qui respire","Hémorragie Externe","Evaluation initiale du polytraumatisé"]}]}]},{"fr":"Art et histoire de la médecine","ar":"فن وتاريخ الطب","sections":[{"label":null,"groups":[{"prof":"Pr. Fahmi","courses":["Axes"]},{"prof":"Pr. El Rhazi","courses":["Santé Publique"]},{"prof":"Pr. Benjelloun","courses":["تاريخ الطب الاسلامي..."]}]}]}];
+
+/* ── model ───────────────────────────────────────────────── */
+const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+const STATUS = [
+  {k:0,ar:"باقية",     tone:"var(--todo)"},
+  {k:1,ar:"كنقرا فيها", tone:"var(--doing)"},
+  {k:2,ar:"خلّصتها",   tone:"var(--done)"}
+];
+const DIFF = [
+  {k:1,ar:"ساهلة",cls:"d1",tag:"EASY",  tone:"var(--done)"},
+  {k:2,ar:"لاباس",cls:"d2",tag:"OK",    tone:"var(--doing)"},
+  {k:3,ar:"صعيبة",cls:"d3",tag:"HARD",  tone:"var(--rubric)"},
+  {k:4,ar:"قاتلة",cls:"d4",tag:"KILLER",tone:"var(--rubric)"}
+];
+
+const MODULES = RAW.map((m, mi) => {
+  const mod = {
+    id:"m" + (mi+1), mi, fr:m.fr, ar:m.ar, roman:ROMAN[mi],
+    accent:"var(--c" + (mi+1) + ")", sections:[], lessons:[], profs:[]
+  };
+  let n = 0;
+  m.sections.forEach((s, si) => {
+    const sec = {label:s.label, groups:[]};
+    s.groups.forEach(g => {
+      const grp = {prof:g.prof, lessons:[]};
+      if (mod.profs.indexOf(g.prof) < 0) mod.profs.push(g.prof);
+      g.courses.forEach(title => {
+        n++;
+        const les = {
+          id: mod.id + "-" + String(n).padStart(3,"0"),
+          n, title, prof:g.prof, section:s.label,
+          mi, mod
+        };
+        grp.lessons.push(les); mod.lessons.push(les);
+      });
+      sec.groups.push(grp);
+    });
+    mod.sections.push(sec);
+  });
+  return mod;
+});
+const ALL = MODULES.flatMap(m => m.lessons);
+const BY_ID = Object.fromEntries(ALL.map(l => [l.id, l]));
+
+/* ── state ───────────────────────────────────────────────── */
+const S = {lessons:{}, modules:{}, prefs:{}, loaded:false, writable:null};
+let db = null, stale = false;
+
+function les(id){ return S.lessons[id] || {}; }
+function st(id){ const v = les(id).status; return v === 1 || v === 2 ? v : 0; }
+function diff(id){ const v = les(id).diff; return v >= 1 && v <= 4 ? v : 0; }
+function hasNote(id){ const d = les(id); return !!((d.note && d.note.trim()) || (d.hard && d.hard.trim()) || (d.easy && d.easy.trim())); }
+function marked(id){ return !!les(id).mark; }
+function modStats(m){
+  let done = 0, doing = 0;
+  m.lessons.forEach(l => { const v = st(l.id); if (v === 2) done++; else if (v === 1) doing++; });
+  return {done, doing, left:m.lessons.length - done - doing, total:m.lessons.length,
+          pct: m.lessons.length ? Math.round(done / m.lessons.length * 100) : 0};
+}
+
+/* ── helpers ─────────────────────────────────────────────── */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fold = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const lat = s => '<span class="lat" dir="ltr">' + esc(s) + "</span>";
+
+/* ── book-set notes ──────────────────────────────────────── */
+function inlineFmt(s){
+  return esc(s)
+    .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
+    .replace(/==([^=\n]+)==/g, "<mark>$1</mark>");
+}
+function typeset(src){
+  const lines = String(src || "").replace(/\r/g,"").split("\n");
+  const out = []; let para = [], list = null, firstPara = true;
+  const flushPara = () => {
+    if (!para.length) return;
+    out.push('<p' + (firstPara ? ' class="lede"' : '') + ">" + inlineFmt(para.join("\n")).replace(/\n/g,"<br>") + "</p>");
+    firstPara = false; para = [];
+  };
+  const flushList = () => { if (list){ out.push("</" + list + ">"); list = null; } };
+  const openList = tag => { if (list !== tag){ flushList(); out.push("<" + tag + ">"); list = tag; } };
+  for (const raw of lines){
+    const line = raw.trimEnd();
+    if (!line.trim()){ flushPara(); flushList(); continue; }
+    let m;
+    if (/^---+$/.test(line.trim())){ flushPara(); flushList(); out.push("<hr>"); continue; }
+    if ((m = line.match(/^###\s+(.*)$/))){ flushPara(); flushList(); out.push("<h5>" + inlineFmt(m[1]) + "</h5>"); continue; }
+    if ((m = line.match(/^##\s+(.*)$/))){ flushPara(); flushList(); out.push("<h4>" + inlineFmt(m[1]) + "</h4>"); continue; }
+    if ((m = line.match(/^#\s+(.*)$/))){ flushPara(); flushList(); out.push("<h3>" + inlineFmt(m[1]) + "</h3>"); continue; }
+    if ((m = line.match(/^!\s*(.*)$/))){ flushPara(); flushList(); out.push('<div class="flag">' + inlineFmt(m[1]) + "</div>"); continue; }
+    if ((m = line.match(/^>\s?(.*)$/))){ flushPara(); flushList(); out.push("<blockquote>" + inlineFmt(m[1]) + "</blockquote>"); continue; }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))){ flushPara(); openList("ol"); out.push("<li>" + inlineFmt(m[1]) + "</li>"); continue; }
+    if ((m = line.match(/^\s*[-*•]\s+(.*)$/))){ flushPara(); openList("ul"); out.push("<li>" + inlineFmt(m[1]) + "</li>"); continue; }
+    flushList(); para.push(line);
+  }
+  flushPara(); flushList();
+  return out.join("\n");
+}
+
+/* ── writes ──────────────────────────────────────────────── */
+const local = {};            /* path -> last known body */
+const queue = {};            /* path -> {dirty, running, timer} */
+let saveTick = null;
+
+function showSaving(on, done){
+  const el = document.getElementById("save");
+  if (!el) return;
+  el.textContent = on ? "كيتسجّل…" : (done ? "تسجّل ✓" : "");
+  el.className = "save" + (!on && done ? " on" : "");
+  if (!on && done){
+    clearTimeout(saveTick);
+    saveTick = setTimeout(() => { if (el.isConnected && el.textContent === "تسجّل ✓") el.textContent = ""; }, 2600);
+  }
+}
+
+function patch(path, body, cache, key){
+  if (S.writable === false) return;
+  local[path] = Object.assign({}, local[path], body);
+  if (cache) cache[key] = Object.assign({}, cache[key], body);
+  const q = queue[path] || (queue[path] = {dirty:false, running:false, timer:0});
+  q.dirty = true;
+  clearTimeout(q.timer);
+  showSaving(true);
+  q.timer = setTimeout(() => flush(path), 650);
+}
+async function flush(path){
+  const q = queue[path];
+  if (!q || q.running || !q.dirty) return;
+  if (!db){ q.dirty = false; showSaving(false, false); return; }
+  q.running = true;
+  while (q.dirty){
+    q.dirty = false;
+    const body = Object.assign({}, local[path], {u: Date.now()});
+    try { await db.doc(path).set(body); }
+    catch (e){
+      q.running = false; showSaving(false, false);
+      if (e && e.code === "invalid_argument") S.writable = false;
+      flash("ما تسجّلتش. عاود جرّب.");
+      return;
+    }
+  }
+  q.running = false;
+  showSaving(false, true);
+}
+function flash(msg){
+  const el = document.getElementById("offline");
+  if (!el) return; el.textContent = msg; el.classList.add("show");
+}
+
+const setLesson = (id, body) => patch("lessons/" + id, body, S.lessons, id);
+const setModule = (id, body) => patch("modules/" + id, body, S.modules, id);
+const setPrefs  = body => { if (S.writable === false) return;
+  local["meta/prefs"] = Object.assign({}, local["meta/prefs"], body);
+  S.prefs = Object.assign({}, S.prefs, body);
+  const q = queue["meta/prefs"] || (queue["meta/prefs"] = {dirty:false, running:false, timer:0});
+  q.dirty = true; clearTimeout(q.timer); q.timer = setTimeout(() => flush("meta/prefs"), 400);
+};
+
+/* ── views ───────────────────────────────────────────────── */
+const view = document.getElementById("view");
+
+function statusDot(id){
+  const v = st(id);
+  return '<span class="s' + v + '" title="' + STATUS[v].ar + '"><span class="dot"></span></span>';
+}
+function rowMarks(id){
+  const d = diff(id), out = [];
+  if (marked(id)) out.push('<span class="star" title="محطوطة بالعلامة">✦</span>');
+  if (hasNote(id)) out.push('<span class="pen" title="فيها نوت">✎</span>');
+  if (d) out.push('<span class="diffmark ' + DIFF[d-1].cls + '">' + DIFF[d-1].tag + "</span>");
+  out.push(statusDot(id));
+  return '<span class="marks">' + out.join("") + "</span>";
+}
+function lessonRow(l, showMod){
+  return '<li><a class="row" href="#l-' + l.id + '">' +
+    '<span class="n">' + String(l.n).padStart(2,"0") + "</span>" +
+    '<span class="t"><span class="ttl">' + lat(l.title) + "</span>" +
+    (showMod ? '<span class="sub2">' + esc(l.mod.fr + " · " + l.prof) + "</span>" : "") +
+    "</span>" + rowMarks(l.id) + "</a></li>";
+}
+
+function renderIndex(){
+  const nn = v => S.loaded ? v : "—";
+  let done = 0, doing = 0;
+  ALL.forEach(l => { const v = st(l.id); if (v === 2) done++; else if (v === 1) doing++; });
+  const left = ALL.length - done - doing;
+  const pct = Math.round(done / ALL.length * 100);
+
+  const exam = S.prefs.exam || "";
+  let cd = "حدّد النهار باش نحسبو ليك الباقي.";
+  if (exam){
+    const d = Math.ceil((new Date(exam + "T00:00:00") - new Date(new Date().toDateString())) / 86400000);
+    cd = d > 1 ? "باقي <b>" + d + "</b> نهار" : d === 1 ? "غدا!" : d === 0 ? "اليوم!" : "فات بـ <b>" + (-d) + "</b> نهار";
+  }
+
+  const bookmarked = ALL.filter(l => marked(l.id));
+  const recent = (S.prefs.last && BY_ID[S.prefs.last]) ? BY_ID[S.prefs.last] : null;
+
+  view.innerHTML =
+    '<section class="front">' +
+      '<div><p class="eyebrow">Faculté de médecine · Semestre 3</p>' +
+      '<h1>كراسة <span>الطب</span></h1>' +
+      '<p class="sub">ستّة موديولات، ' + ALL.length + ' درس. كل درس فيه الصفحة ديالو: النوت، الحالة، وشنو صعيب وشنو ساهل فيه.</p></div>' +
+      '<div class="tally"><span class="big num">' + (S.loaded ? done : "—") + "</span>" +
+        '<span class="of">/ ' + ALL.length + " درس خلّصتهم</span>" +
+        '<div class="meter" style="--accent:var(--done)"><i style="width:' + (S.loaded ? pct : 0) + '%"></i></div>' +
+        '<p class="cap">' + (S.loaded ? pct + "٪ من السيميستر" : "كنقلّب على النوت…") + "</p></div>" +
+    "</section>" +
+
+    '<div class="legend">' +
+      '<span class="s2"><span class="dot"></span>خلّصت <b>' + nn(done) + "</b></span>" +
+      '<span class="s1"><span class="dot"></span>كنقرا <b>' + nn(doing) + "</b></span>" +
+      '<span class="s0"><span class="dot"></span>باقي <b>' + nn(left) + "</b></span>" +
+      (recent ? '<span>آخر درس فتحتو: <a href="#l-' + recent.id + '">' + lat(recent.title) + "</a></span>" : "") +
+    "</div>" +
+
+    '<div class="strip">' +
+      '<div class="field"><label for="q">قلّب على درس، أستاذ، ولا موديول</label>' +
+        '<input type="search" id="q" placeholder="مثلا: ECG، Pr. Akoudad، ictères…" autocomplete="off"></div>' +
+      '<div class="field" style="flex:0 1 11rem"><label for="exam">نهار الامتحان</label>' +
+        '<input type="date" id="exam" value="' + esc(exam) + '"></div>' +
+      '<p class="countdown">' + cd + "</p>" +
+    "</div>" +
+    '<ul class="rows" id="qres" hidden></ul>' +
+
+    '<section class="block"><h2>الموديولات</h2><div class="shelf">' +
+      MODULES.map(m => {
+        const s = modStats(m);
+        return '<a class="chap" href="#' + m.id + '" style="--accent:' + m.accent + '">' +
+          '<span class="rn">' + m.roman + " · CHAPITRE</span>" +
+          "<h3>" + lat(m.fr) + "</h3>" +
+          '<p class="arname">' + esc(m.ar) + "</p>" +
+          '<div class="meter" style="--accent:' + m.accent + '"><i style="width:' + s.pct + '%"></i></div>' +
+          '<div class="foot"><span>' + s.total + " دروس · " + m.profs.length + ' profs</span><span class="pct">' + s.pct + "٪</span></div>" +
+        "</a>";
+      }).join("") +
+    "</div></section>" +
+
+    '<section class="block"><h2>محطوطين بالعلامة</h2>' +
+      (bookmarked.length
+        ? '<ul class="rows">' + bookmarked.map(l => lessonRow(l, true)).join("") + "</ul>"
+        : '<p class="hint">حتى درس مازال. حيّد ✦ على شي درس بغيت ترجع ليه بسرعة وغادي يبان هنا.</p>') +
+    "</section>" +
+    '<span class="ornament">❖ ❖ ❖</span>';
+
+  const q = document.getElementById("q"), res = document.getElementById("qres");
+  q.addEventListener("input", () => {
+    const t = fold(q.value.trim());
+    if (t.length < 2){ res.hidden = true; res.innerHTML = ""; return; }
+    const hits = ALL.filter(l => fold(l.title + " " + l.prof + " " + l.mod.fr + " " + l.mod.ar + " " + (l.section||"")).includes(t)).slice(0, 24);
+    res.hidden = false;
+    res.innerHTML = hits.length ? hits.map(l => lessonRow(l, true)).join("")
+      : '<li><p class="hint">ما لقيت حتى درس بهاد الكلمة.</p></li>';
+  });
+  document.getElementById("exam").addEventListener("change", e => { setPrefs({exam:e.target.value}); render(); });
+}
+
+function renderModule(m){
+  const s = modStats(m);
+  const op = (S.modules[m.id] || {}).opinion || "";
+  view.innerHTML =
+    '<p class="crumb"><a href="#fihris">الفهرس</a> ❯ <span>' + lat(m.fr) + "</span></p>" +
+    '<header class="chead" style="--accent:' + m.accent + '">' +
+      '<p class="eyebrow">' + m.roman + " · CHAPITRE</p>" +
+      "<h1>" + lat(m.fr) + '</h1><p class="arname">' + esc(m.ar) + "</p>" +
+      '<div class="meter" style="--accent:' + m.accent + '"><i style="width:' + s.pct + '%"></i></div>' +
+      '<div class="stats"><span>' + s.total + " دروس</span><span>" + m.profs.length + " أساتذة</span>" +
+      "<span>خلّصت " + s.done + "</span><span>كنقرا " + s.doing + "</span><span>باقي " + s.left + "</span></div>" +
+    "</header>" +
+    '<div class="card" style="max-width:46rem">' +
+      '<div class="cardhead"><h2>رأيي في المادة كاملة</h2><span class="save" id="save"></span></div>' +
+      '<p class="tip">واش ثقيلة؟ منين تبدا؟ أي أستاذ مهم؟ — كتب هنا وكيتسجّل وحدو.</p>' +
+      '<textarea class="minibox" id="op" style="min-height:6rem" placeholder="مثلا: الموديول طويل مي منظم، ابدا بـ…"></textarea></div>' +
+    MODULES[m.mi].sections.map(sec =>
+      '<section class="part">' +
+        (sec.label ? "<h2>" + lat(sec.label) + "</h2>" : "") +
+        sec.groups.map(g =>
+          '<div class="prof" style="--accent:' + m.accent + '"><h3>' + esc(g.prof) + "</h3>" +
+          '<ul class="rows">' + g.lessons.map(l => lessonRow(l, false)).join("") + "</ul></div>"
+        ).join("") +
+      "</section>"
+    ).join("") +
+    '<span class="ornament">❖</span>';
+
+  const t = document.getElementById("op");
+  t.value = op; lockIf(t);
+  t.addEventListener("input", () => setModule(m.id, {opinion:t.value}));
+}
+
+function renderLesson(l){
+  const d = les(l.id), m = l.mod;
+  const idx = m.lessons.indexOf(l);
+  const prev = m.lessons[idx-1], next = m.lessons[idx+1];
+  const cur = st(l.id), cd = diff(l.id);
+  if (S.prefs.last !== l.id) setPrefs({last:l.id});
+
+  view.innerHTML =
+    '<p class="crumb"><a href="#fihris">الفهرس</a> ❯ <a href="#' + m.id + '">' + lat(m.fr) + "</a></p>" +
+    '<div class="leaf">' +
+      "<div>" +
+        '<header class="lhead" style="--accent:' + m.accent + '">' +
+          '<p class="pre">' + m.roman + " · " + String(l.n).padStart(2,"0") + (l.section ? " · " + esc(l.section) : "") + "</p>" +
+          "<h1>" + lat(l.title) + "</h1>" +
+          '<p class="who">' + esc(l.prof) + "</p>" +
+        "</header>" +
+        '<div class="controls">' +
+          '<div class="ctl"><span>الحالة</span><div class="seg tone" id="segst" style="--tone:' + STATUS[cur].tone + '">' +
+            STATUS.map(x => '<button type="button" data-k="' + x.k + '" aria-pressed="' + (x.k === cur) + '">' + x.ar + "</button>").join("") +
+          "</div></div>" +
+          '<div class="ctl"><span>صعوبتها</span><div class="seg tone" id="segd" style="--tone:' + (cd ? DIFF[cd-1].tone : "var(--todo)") + '">' +
+            DIFF.map(x => '<button type="button" data-k="' + x.k + '" aria-pressed="' + (x.k === cd) + '">' + x.ar + "</button>").join("") +
+          "</div></div>" +
+          '<div class="ctl"><span>علامة</span>' +
+            '<button class="markbtn" type="button" id="mark" aria-pressed="' + marked(l.id) + '">✦ رجع ليها</button></div>' +
+        "</div>" +
+        '<section class="notewrap">' +
+          '<div class="notebar"><h2>النوت ديالي</h2><span class="save" id="save"></span>' +
+            '<div class="seg" id="segmode">' +
+              '<button type="button" data-m="w" aria-pressed="true">كتب</button>' +
+              '<button type="button" data-m="r" aria-pressed="false">قراية</button>' +
+            "</div></div>" +
+          '<div class="notebody" id="notebody"></div>' +
+        "</section>" +
+        '<nav class="pager">' +
+          (prev ? '<a href="#l-' + prev.id + '"><span class="k">❯ اللي قبل</span><span class="v">' + lat(prev.title) + "</span></a>" : "<span></span>") +
+          (next ? '<a href="#l-' + next.id + '"><span class="k">اللي من بعد ❮</span><span class="v">' + lat(next.title) + "</span></a>" : "<span></span>") +
+        "</nav>" +
+      "</div>" +
+      "<aside>" +
+        '<div class="card" style="border-top:2px solid ' + m.accent + '"><h2>رأيي في الدرس</h2>' +
+          '<p class="lab">شنو صعيب فيه</p>' +
+          '<textarea class="minibox" id="hard" placeholder="الجزء اللي كيعيّقني…"></textarea>' +
+          '<p class="lab">شنو ساهل فيه</p>' +
+          '<textarea class="minibox" id="easy" placeholder="هادشي فهمتو من اللول…"></textarea>' +
+          '<p class="tip">كلشي كيبان مجموع فصفحة «الآراء».</p></div>' +
+      "</aside>" +
+    "</div>";
+
+  const body = document.getElementById("notebody");
+  let mode = "w";
+  function paintNote(){
+    if (mode === "w"){
+      body.innerHTML = '<textarea id="note-' + l.id + '" placeholder="كتب النوت ديالك هنا…"></textarea>' +
+        '<p class="syntax"><code># عنوان</code> · <code>## عنوان صغير</code> · <code>### فرع</code> · ' +
+        '<code>- لائحة</code> · <code>1. مرتّبة</code> · <code>&gt; اقتباس</code> · <code>! مهم</code> · ' +
+        '<code>**غليظ**</code> · <code>*مايل*</code> · <code>==معلّم==</code> · <code>---</code> فاصل</p>';
+      const ta = body.firstChild;
+      ta.value = (les(l.id).note || ""); lockIf(ta);
+      ta.addEventListener("input", () => setLesson(l.id, {note:ta.value}));
+    } else {
+      const src = (les(l.id).note || "").trim();
+      body.innerHTML = src ? '<div class="typeset">' + typeset(src) + "</div>"
+        : '<p class="empty">مازال ما كتبتي حتى نوتة فهاد الدرس. دوز لـ«كتب» وبدا.</p>';
+    }
+  }
+  paintNote();
+  document.getElementById("segmode").addEventListener("click", e => {
+    const b = e.target.closest("button[data-m]"); if (!b) return;
+    mode = b.dataset.m;
+    [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    paintNote();
+  });
+  const press = (seg, v) => seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.k === v)));
+  document.getElementById("segst").addEventListener("click", e => {
+    const b = e.target.closest("button[data-k]"); if (!b) return;
+    const k = +b.dataset.k, nv = st(l.id) === k ? 0 : k;
+    setLesson(l.id, {status:nv});
+    e.currentTarget.style.setProperty("--tone", STATUS[nv].tone); press(e.currentTarget, nv);
+  });
+  document.getElementById("segd").addEventListener("click", e => {
+    const b = e.target.closest("button[data-k]"); if (!b) return;
+    const k = +b.dataset.k, nv = diff(l.id) === k ? 0 : k;
+    setLesson(l.id, {diff:nv});
+    e.currentTarget.style.setProperty("--tone", nv ? DIFF[nv-1].tone : "var(--todo)"); press(e.currentTarget, nv);
+  });
+  const mk = document.getElementById("mark");
+  mk.addEventListener("click", () => {
+    const nv = !marked(l.id); setLesson(l.id, {mark:nv}); mk.setAttribute("aria-pressed", String(nv));
+  });
+
+  const h = document.getElementById("hard"), ez = document.getElementById("easy");
+  h.value = d.hard || ""; ez.value = d.easy || ""; lockIf(h); lockIf(ez);
+  h.addEventListener("input", () => setLesson(l.id, {hard:h.value}));
+  ez.addEventListener("input", () => setLesson(l.id, {easy:ez.value}));
+}
+
+function renderAray(){
+  const hard = ALL.filter(l => diff(l.id) >= 3).sort((a,b) => diff(b.id) - diff(a.id));
+  const easy = ALL.filter(l => diff(l.id) === 1);
+  const said = ALL.filter(l => (les(l.id).hard||"").trim() || (les(l.id).easy||"").trim());
+  const ops = MODULES.filter(m => ((S.modules[m.id]||{}).opinion||"").trim());
+
+  view.innerHTML =
+    '<p class="crumb"><a href="#fihris">الفهرس</a> ❯ <span>الآراء</span></p>' +
+    '<header class="chead" style="--accent:var(--rubric)"><p class="eyebrow">Mes remarques</p>' +
+      "<h1>الآراء ديالي</h1>" +
+      '<p class="arname">كلشي اللي كتبتي على الدروس مجموع فبلاصة واحدة — مزيان قبل الامتحان.</p></header>' +
+
+    '<section class="block"><h2>دروس صعيبة</h2>' +
+      (hard.length ? '<ul class="rows">' + hard.map(l => lessonRow(l, true)).join("") + "</ul>"
+        : '<p class="hint">مازال ما علّمتي حتى درس بـ«صعيبة» ولا «قاتلة».</p>') + "</section>" +
+
+    '<section class="block"><h2>دروس ساهلة</h2>' +
+      (easy.length ? '<ul class="rows">' + easy.map(l => lessonRow(l, true)).join("") + "</ul>"
+        : '<p class="hint">مازال ما علّمتي حتى درس بـ«ساهلة».</p>') + "</section>" +
+
+    '<section class="block"><h2>شنو صعيب وشنو ساهل</h2>' +
+      (said.length ? '<div class="grid2">' + said.map(l =>
+        '<article class="op" style="--accent:' + l.mod.accent + '"><h3>' + lat(l.title) + "</h3>" +
+        '<p class="arname">' + esc(l.mod.fr) + " · " + esc(l.prof) + "</p>" +
+        ((les(l.id).hard||"").trim() ? '<p class="lab-hard">صعيب</p><p class="quote">' + esc(les(l.id).hard.trim()) + "</p>" : "") +
+        ((les(l.id).easy||"").trim() ? '<p class="lab-easy">ساهل</p><p class="quote">' + esc(les(l.id).easy.trim()) + "</p>" : "") +
+        '<p style="margin:.9rem 0 0"><a class="srclink" href="#l-' + l.id + '">افتح الصفحة ❮</a></p></article>').join("") + "</div>"
+        : '<p class="hint">كتب فشي درس شنو صعيب فيه وشنو ساهل، وغادي يتجمع هنا.</p>') + "</section>" +
+
+    '<section class="block"><h2>رأيي في كل مادة</h2>' +
+      (ops.length ? '<div class="grid2">' + ops.map(m =>
+        '<article class="op" style="--accent:' + m.accent + '"><h3>' + lat(m.fr) + "</h3>" +
+        '<p class="arname">' + esc(m.ar) + '</p><p class="txt">' + esc(S.modules[m.id].opinion.trim()) + "</p>" +
+        '<p style="margin:.9rem 0 0"><a class="srclink" href="#' + m.id + '">افتح الموديول ❮</a></p></article>').join("") + "</div>"
+        : '<p class="hint">دخل لشي موديول وكتب رأيك فيه، وغادي يبان هنا.</p>') + "</section>" +
+    '<span class="ornament">❖ ❖ ❖</span>';
+}
+
+function lockIf(el){ if (S.writable === false){ el.readOnly = true; el.title = "القراية فقط"; } }
+
+/* ── router ──────────────────────────────────────────────── */
+function render(){
+  const h = (location.hash || "#fihris").slice(1);
+  document.querySelectorAll(".nlink").forEach(a => {
+    const on = a.dataset.v === h || (h.startsWith("m") && a.dataset.v === "fihris" && h !== "aray");
+    if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+  if (h.startsWith("l-") && BY_ID[h.slice(2)]) renderLesson(BY_ID[h.slice(2)]);
+  else if (h === "aray") renderAray();
+  else {
+    const m = MODULES.find(x => x.id === h);
+    if (m) renderModule(m); else renderIndex();
+  }
+  if (stale) document.getElementById("offline").classList.add("show");
+}
+/* never re-render under someone's fingers: wait until the field loses focus */
+let pendingRender = false;
+function safeRender(){
+  const ae = document.activeElement;
+  if (ae && (ae.tagName === "TEXTAREA" || ae.tagName === "INPUT")){ pendingRender = true; return; }
+  pendingRender = false; render();
+}
+addEventListener("focusout", () => {
+  if (!pendingRender) return;
+  setTimeout(() => {
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === "TEXTAREA" || ae.tagName === "INPUT")) return;
+    pendingRender = false; render();
+  }, 60);
+});
+let lastHash = location.hash;
+addEventListener("hashchange", () => {
+  const changed = lastHash !== location.hash; lastHash = location.hash;
+  render(); if (changed) scrollTo({top:0, behavior:"instant"});
+});
+
+/* theme */
+const root = document.documentElement;
+try { const t = localStorage.getItem("s3-theme"); if (t) root.setAttribute("data-theme", t); } catch(e){}
+document.getElementById("theme").addEventListener("click", () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const now = root.getAttribute("data-theme") || (dark ? "dark" : "light");
+  const next = now === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("s3-theme", next); } catch(e){}
+});
+
+/* "/" focuses search on the index */
+addEventListener("keydown", e => {
+  if (e.key === "/" && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){
+    const q = document.getElementById("q"); if (q){ e.preventDefault(); q.focus(); }
+  }
+});
+
+render();
+
+/* ── store ───────────────────────────────────────────────── */
+async function useCap(name){
+  try { return (await window.claude?.use?.(name)) || null; } catch(e){ return null; }
+}
+(async () => {
+  const user = await useCap("user");
+  if (user){
+    try { const w = await user.can("data.write"); if (w === false) S.writable = false; } catch(e){}
+  }
+  db = await useCap("db");
+  if (!db){ S.loaded = true; S.writable = false; stale = true; safeRender(); return; }
+
+  const timer = setTimeout(() => { stale = true; safeRender(); }, 10000);
+  const settle = () => { clearTimeout(timer); stale = false; S.loaded = true;
+    document.getElementById("offline").classList.remove("show"); safeRender(); };
+  const busy = p => !!(queue[p] && (queue[p].dirty || queue[p].running));
+
+  db.collection("lessons").onSnapshot(snap => {
+    snap.docs.forEach(d => {
+      const p = "lessons/" + d.id;
+      if (busy(p)) return;
+      S.lessons[d.id] = d.data() || {}; local[p] = S.lessons[d.id];
+    });
+    if (!snap.metadata.fromCache) settle(); else safeRender();
+  }, e => { stale = true; S.loaded = true; if (e && e.code === "revoked") S.writable = false; safeRender(); });
+
+  db.collection("modules").onSnapshot(snap => {
+    snap.docs.forEach(d => {
+      const p = "modules/" + d.id;
+      if (busy(p)) return;
+      S.modules[d.id] = d.data() || {}; local[p] = S.modules[d.id];
+    });
+    safeRender();
+  }, () => {});
+
+  db.doc("meta/prefs").onSnapshot(snap => {
+    const p = "meta/prefs";
+    if (busy(p) || !snap.exists) return;
+    S.prefs = snap.data() || {}; local[p] = S.prefs; safeRender();
+  }, () => {});
+})();
+</script>
