@@ -1,0 +1,1301 @@
+<title>Mehdi's Journal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a sticky bar, one wide writing sheet for the chosen day, then the
+     whole year as twelve month cards. Today owns the biggest cell: its month
+     card doubles, its week row grows, its weekday column widens. */
+  :root {
+    --paper: #E6EAE9;
+    --paper-2: #DCE2E0;
+    --card: #FAFCFB;
+    --ink: #0F1E1D;
+    --ink-2: #51645F;
+    --ink-3: #7D918C;
+    --line: #CBD5D2;
+    --line-soft: #DDE4E2;
+    --accent: #0B5E63;
+    --accent-ink: #F2FAF9;
+    --accent-soft: rgba(11, 94, 99, 0.09);
+    --good: #2C6B4C;
+    --good-soft: rgba(44, 107, 76, 0.10);
+    --bad: #A1512F;
+    --bad-soft: rgba(161, 81, 47, 0.10);
+    --brass: #B4703A;
+
+    --scale: 1;
+    --u: calc(16px * var(--scale));
+    --t-xs: calc(var(--u) * 0.68);
+    --t-sm: calc(var(--u) * 0.80);
+    --t-md: calc(var(--u) * 0.90);
+    --t-base: var(--u);
+    --t-lg: calc(var(--u) * 1.18);
+    --t-xl: calc(var(--u) * 1.5);
+    --t-2xl: calc(var(--u) * 2.1);
+    --t-3xl: calc(var(--u) * 3.4);
+
+    --display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --body: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --radius: 4px;
+    --shadow: 0 1px 2px rgba(15, 30, 29, 0.06), 0 8px 24px -16px rgba(15, 30, 29, 0.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0B1413;
+      --paper-2: #101A19;
+      --card: #131E1D;
+      --ink: #E4EDEA;
+      --ink-2: #92A7A2;
+      --ink-3: #6B807B;
+      --line: #22312F;
+      --line-soft: #1B2827;
+      --accent: #4FBEB0;
+      --accent-ink: #04201F;
+      --accent-soft: rgba(79, 190, 176, 0.12);
+      --good: #74C294;
+      --good-soft: rgba(116, 194, 148, 0.13);
+      --bad: #DF8D6C;
+      --bad-soft: rgba(223, 141, 108, 0.13);
+      --brass: #D29A5E;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -18px rgba(0, 0, 0, 0.8);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0B1413;
+    --paper-2: #101A19;
+    --card: #131E1D;
+    --ink: #E4EDEA;
+    --ink-2: #92A7A2;
+    --ink-3: #6B807B;
+    --line: #22312F;
+    --line-soft: #1B2827;
+    --accent: #4FBEB0;
+    --accent-ink: #04201F;
+    --accent-soft: rgba(79, 190, 176, 0.12);
+    --good: #74C294;
+    --good-soft: rgba(116, 194, 148, 0.13);
+    --bad: #DF8D6C;
+    --bad-soft: rgba(223, 141, 108, 0.13);
+    --brass: #D29A5E;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -18px rgba(0, 0, 0, 0.8);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: var(--t-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--paper);
+    z-index: 30;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button { font: inherit; color: inherit; }
+
+  /* ---------- top bar ---------- */
+  .bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar-in {
+    max-width: 1480px;
+    margin-inline: auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: calc(var(--u) * 0.55);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(var(--u) * 0.7) calc(var(--u) * 1.1);
+  }
+  .wordmark { display: flex; align-items: baseline; gap: 0.5em; margin-right: auto; min-width: 0; }
+  .wordmark b {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: var(--t-lg);
+    letter-spacing: -0.01em;
+  }
+  .wordmark i {
+    font-family: var(--display);
+    font-size: var(--t-sm);
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .seg {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+    overflow: hidden;
+  }
+  .seg > button {
+    background: none;
+    border: 0;
+    border-left: 1px solid var(--line-soft);
+    padding: 0.3em 0.62em;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    color: var(--ink-2);
+    letter-spacing: 0.04em;
+  }
+  .seg > button:first-child { border-left: 0; }
+  .seg > button:hover { background: var(--accent-soft); color: var(--ink); }
+  .seg > button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .seg-label {
+    font-family: var(--display);
+    font-size: var(--t-sm);
+    color: var(--ink-3);
+    padding-inline: 0.5em 0;
+    align-self: center;
+  }
+  .yearnav { display: flex; align-items: center; gap: 0.35em; }
+  .yearnav button, .today-btn, .daystep {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.3em 0.7em;
+    cursor: pointer;
+    font-size: var(--t-md);
+    line-height: 1.3;
+  }
+  .yearnav button { font-family: var(--mono); padding-inline: 0.6em; }
+  .yearnav button:hover, .today-btn:hover, .daystep:hover { border-color: var(--accent); color: var(--accent); }
+  #yearInput {
+    width: 4.4em;
+    text-align: center;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--t-md);
+    padding: 0.3em 0.2em;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    -moz-appearance: textfield;
+  }
+  #yearInput::-webkit-outer-spin-button, #yearInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .today-btn { font-family: var(--display); }
+
+  /* ---------- page ---------- */
+  main {
+    max-width: 1480px;
+    margin-inline: auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: calc(var(--u) * 1.5) calc(var(--u) * 3);
+  }
+  .notice {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--brass);
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 0.7em 0.9em;
+    font-size: var(--t-sm);
+    color: var(--ink-2);
+    margin-bottom: calc(var(--u) * 1.1);
+  }
+
+  /* ---------- the day sheet ---------- */
+  .sheet {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .sheet-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: calc(var(--u) * 0.8);
+    padding: calc(var(--u) * 1.1) calc(var(--u) * 1.2) calc(var(--u) * 0.9);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .daymark { display: flex; align-items: baseline; gap: calc(var(--u) * 0.7); margin-right: auto; min-width: 0; }
+  .dnum {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-3xl);
+    line-height: 0.82;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+  .dmeta { min-width: 0; }
+  .dwd {
+    font-family: var(--display);
+    font-size: var(--t-xl);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .dmy {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    margin-top: 0.3em;
+  }
+  .chip {
+    display: inline-block;
+    margin-top: 0.55em;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.18em 0.5em;
+    border-radius: 2px;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .chip.past { background: var(--paper-2); color: var(--ink-2); }
+  .chip.ahead { background: none; color: var(--brass); border: 1px solid var(--brass); }
+  .sheet-tools { display: flex; align-items: center; gap: 0.6em; flex-wrap: wrap; }
+  .daystep { font-family: var(--mono); padding-inline: 0.6em; }
+  .status {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    min-width: 9ch;
+  }
+  .status.warn { color: var(--bad); }
+
+  .blocks {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--line-soft);
+  }
+  @media (min-width: 820px) {
+    .blocks { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  }
+  .block {
+    background: var(--card);
+    padding: calc(var(--u) * 1) calc(var(--u) * 1.2) calc(var(--u) * 1.2);
+    min-width: 0;
+  }
+  .block > h2 {
+    margin: 0 0 0.75em;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+  .block > h2::before {
+    content: "";
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    background: var(--ink-3);
+    flex: none;
+  }
+  .block.b-tasks > h2::before { background: var(--accent); }
+  .block.b-liked > h2::before { background: var(--good); }
+  .block.b-disliked > h2::before { background: var(--bad); }
+  .block > h2 .count { margin-left: auto; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+
+  textarea {
+    width: 100%;
+    min-height: calc(var(--u) * 5.2);
+    resize: none;
+    border: 0;
+    border-bottom: 1px solid var(--line-soft);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: var(--t-base);
+    line-height: 1.62;
+    padding: 0 0 0.4em;
+    overflow: hidden;
+  }
+  textarea::placeholder { color: var(--ink-3); font-style: italic; }
+  textarea:focus { outline: none; border-bottom-color: var(--accent); }
+  .b-liked textarea:focus { border-bottom-color: var(--good); }
+  .b-disliked textarea:focus { border-bottom-color: var(--bad); }
+
+  .tasklist { list-style: none; margin: 0 0 0.6em; padding: 0; display: flex; flex-direction: column; }
+  .tasklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6em;
+    padding: 0.34em 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .tick {
+    flex: none;
+    margin-top: 0.15em;
+    width: 1.15em;
+    height: 1.15em;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--paper);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--accent-ink);
+    font-size: var(--t-sm);
+    line-height: 1;
+  }
+  .tick:hover { border-color: var(--accent); }
+  .tick[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+  .tasklist input.ttext {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: var(--t-base);
+    line-height: 1.5;
+    padding: 0;
+  }
+  .tasklist input.ttext:focus { outline: none; }
+  li.done input.ttext { color: var(--ink-3); text-decoration: line-through; }
+  .kill {
+    flex: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: var(--t-sm);
+    line-height: 1;
+    padding: 0.2em 0.3em;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .tasklist li:hover .kill, .kill:focus-visible { opacity: 1; }
+  .addrow { display: flex; align-items: center; gap: 0.5em; }
+  .addrow input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px dashed var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: var(--t-base);
+    padding: 0.3em 0;
+  }
+  .addrow input::placeholder { color: var(--ink-3); font-style: italic; }
+  .addrow input:focus { outline: none; border-bottom-color: var(--accent); border-bottom-style: solid; }
+  .addrow button {
+    flex: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.32em 0.8em;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .empty-hint {
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--ink-3);
+    font-size: var(--t-md);
+    margin: 0 0 0.7em;
+  }
+
+  /* ---------- year ---------- */
+  .year-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7em;
+    flex-wrap: wrap;
+    margin: calc(var(--u) * 2.4) 0 calc(var(--u) * 1);
+    padding-bottom: calc(var(--u) * 0.5);
+    border-bottom: 1px solid var(--line);
+  }
+  .year-head h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-2xl);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .year-head p {
+    margin: 0 0 0 auto;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .months { display: grid; grid-template-columns: 1fr; gap: calc(var(--u) * 0.9); align-items: start; }
+  @media (min-width: 680px) { .months { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1020px) { .months { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 1340px) { .months { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .month {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: calc(var(--u) * 0.7) calc(var(--u) * 0.75) calc(var(--u) * 0.8);
+    min-width: 0;
+  }
+  .month.is-now { border-color: var(--accent); box-shadow: var(--shadow); }
+  @media (min-width: 680px) { .month.is-now { grid-column: span 2; } }
+  .month > header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    margin-bottom: calc(var(--u) * 0.5);
+  }
+  .month > header h3 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-lg);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .month.is-now > header h3 { color: var(--accent); }
+  .month > header .mc {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mgrid {
+    --rowh: calc(var(--u) * 2.4);
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: auto;
+    grid-auto-rows: var(--rowh);
+    gap: 2px;
+  }
+  .month.is-now .mgrid {
+    --rowh: calc(var(--u) * 2.8);
+    --rowh-now: calc(var(--u) * 5.2);
+  }
+  @media (min-width: 680px) {
+    .month.is-now .mgrid {
+      --rowh: calc(var(--u) * 3.4);
+      --rowh-now: calc(var(--u) * 8.2);
+    }
+  }
+  .wd {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    color: var(--ink-3);
+    text-align: center;
+    padding-bottom: 0.25em;
+    user-select: none;
+  }
+  .wd.we { color: var(--brass); }
+  .cell {
+    position: relative;
+    height: var(--rowh);
+    align-self: start;
+    display: grid;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: var(--paper-2);
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  .cell:hover { border-color: var(--accent); color: var(--ink); }
+  .cell.future { background: transparent; color: var(--ink-3); border-color: var(--line-soft); }
+  .cell.has::after {
+    content: "";
+    position: absolute;
+    bottom: 11%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cell.sel { border-color: var(--accent); color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
+  .cell.in-row, .cell.in-col,
+  .cell.in-row.future, .cell.in-col.future { background: var(--accent-soft); }
+
+  /* today: the one big box */
+  .cell.now {
+    height: auto;
+    align-self: stretch;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    place-items: stretch;
+    padding: 0.4em 0.45em;
+    box-shadow: var(--shadow);
+    z-index: 2;
+  }
+  .cell.now::after { display: none; }
+  .cell.now .nnum {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-xl);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-align: left;
+  }
+  .cell.now .nbody {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.25em;
+    text-align: left;
+    min-width: 0;
+  }
+  .cell.now .nlabel {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .cell.now .nline {
+    font-family: var(--display);
+    font-size: var(--t-sm);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cell.now .nmarks { display: flex; gap: 0.3em; align-items: center; }
+  .cell.now .nmarks span {
+    width: 0.48em;
+    height: 0.48em;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.55;
+  }
+  .cell.now .nmarks span.on { background: currentColor; opacity: 1; }
+  .cell.now .nbody .nlabel, .cell.now .nbody .nline, .cell.now .nbody .nmarks { display: none; }
+  @media (min-width: 680px) {
+    .cell.now .nnum { font-size: var(--t-2xl); }
+    .cell.now .nbody .nlabel, .cell.now .nbody .nmarks { display: flex; }
+    .cell.now .nbody .nline { display: -webkit-box; }
+  }
+
+  footer {
+    margin-top: calc(var(--u) * 2.4);
+    padding-top: calc(var(--u) * 0.8);
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em 1.2em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="wordmark">
+      <b>Mehdi's Journal</b>
+      <i>one day at a time</i>
+    </div>
+    <span class="seg-label">Aa</span>
+    <div class="seg" role="group" aria-label="Text size" id="sizeSeg">
+      <button type="button" data-step="0">S</button>
+      <button type="button" data-step="1">M</button>
+      <button type="button" data-step="2">L</button>
+      <button type="button" data-step="3">XL</button>
+    </div>
+    <div class="yearnav">
+      <button type="button" id="prevYear" aria-label="Previous year">&#8249;</button>
+      <input id="yearInput" type="number" inputmode="numeric" step="1" aria-label="Year">
+      <button type="button" id="nextYear" aria-label="Next year">&#8250;</button>
+    </div>
+    <button type="button" class="today-btn" id="todayBtn">Today</button>
+  </div>
+</header>
+
+<main>
+  <div class="notice" id="notice" hidden></div>
+
+  <section class="sheet" aria-labelledby="dwd">
+    <div class="sheet-head">
+      <div class="daymark">
+        <div class="dnum" id="dnum">--</div>
+        <div class="dmeta">
+          <div class="dwd" id="dwd">&nbsp;</div>
+          <div class="dmy" id="dmy">&nbsp;</div>
+          <span class="chip" id="dchip" hidden>Today</span>
+        </div>
+      </div>
+      <div class="sheet-tools">
+        <button type="button" class="daystep" id="prevDay" aria-label="Previous day">&#8249;</button>
+        <button type="button" class="daystep" id="nextDay" aria-label="Next day">&#8250;</button>
+        <span class="status" id="status">&nbsp;</span>
+      </div>
+    </div>
+
+    <div class="blocks">
+      <div class="block b-tasks">
+        <h2>Tasks of the day <span class="count" id="taskCount"></span></h2>
+        <p class="empty-hint" id="taskHint" hidden>Nothing listed yet.</p>
+        <ul class="tasklist" id="taskList"></ul>
+        <div class="addrow">
+          <input id="taskAdd" type="text" placeholder="Add a task and press Enter" aria-label="Add a task">
+          <button type="button" id="taskAddBtn">Add</button>
+        </div>
+      </div>
+
+      <div class="block b-impressions">
+        <h2>Impressions</h2>
+        <textarea id="fImpressions" placeholder="How did the day feel?" aria-label="Impressions"></textarea>
+      </div>
+
+      <div class="block b-liked">
+        <h2>What I liked</h2>
+        <textarea id="fLiked" placeholder="One thing worth keeping." aria-label="What I liked"></textarea>
+      </div>
+
+      <div class="block b-disliked">
+        <h2>What I didn't like</h2>
+        <textarea id="fDisliked" placeholder="One thing to leave behind." aria-label="What I didn't like"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <div class="year-head">
+    <h2 id="yearTitle">----</h2>
+    <p id="yearStat">&nbsp;</p>
+  </div>
+  <div class="months" id="months"></div>
+
+  <footer>
+    <span>Arrow keys move the day</span>
+    <span>Dot = a day with writing</span>
+    <span id="dbNote">Saved to this journal</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var MONTHS = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+  var WDS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  var WDL = ["M", "T", "W", "T", "F", "S", "S"];
+  var STEPS = [0.88, 1, 1.14, 1.3];
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- dates ---------- */
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function keyOf(y, m, d) { return y + "-" + pad(m + 1) + "-" + pad(d); }
+  function keyFromDate(dt) { return keyOf(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
+  function dateFromKey(k) {
+    var p = k.split("-");
+    return new Date(+p[0], +p[1] - 1, +p[2]);
+  }
+  function mondayIndex(dt) { return (dt.getDay() + 6) % 7; }
+  function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+
+  var todayKey = keyFromDate(new Date());
+
+  /* ---------- state ---------- */
+  var entries = new Map();      // key -> {tasks, impressions, liked, disliked}
+  var selected = todayKey;
+  var year = +todayKey.slice(0, 4);
+  var db = null;
+  var cellMap = new Map();
+  var dirty = new Set();
+  var flushing = false;
+  var saveTimer = null;
+  var loadTimer = null;
+  var readOnly = false;
+
+  function blank() { return { tasks: [], impressions: "", liked: "", disliked: "" }; }
+  function entryOf(k) { return entries.get(k) || blank(); }
+  function isEmpty(e) {
+    return (!e.tasks || e.tasks.length === 0) && !e.impressions.trim() &&
+      !e.liked.trim() && !e.disliked.trim();
+  }
+  function mutate(k) {
+    var e = entries.get(k);
+    if (!e) { e = blank(); entries.set(k, e); }
+    return e;
+  }
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+
+  /* ---------- text size ---------- */
+  function applyStep(i) {
+    i = Math.max(0, Math.min(3, i | 0));
+    document.documentElement.style.setProperty("--scale", STEPS[i]);
+    var bs = $("sizeSeg").querySelectorAll("button");
+    for (var j = 0; j < bs.length; j++) {
+      bs[j].setAttribute("aria-pressed", j === i ? "true" : "false");
+    }
+    try { localStorage.setItem("mj.size", String(i)); } catch (err) { /* private mode */ }
+    sizeTextareas();
+  }
+  $("sizeSeg").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-step]");
+    if (b) applyStep(+b.dataset.step);
+  });
+  (function () {
+    var i = 1;
+    try { var s = localStorage.getItem("mj.size"); if (s !== null) i = +s; } catch (err) { /* ignore */ }
+    applyStep(i);
+  })();
+
+  /* ---------- status ---------- */
+  var statusEl = $("status");
+  function setStatus(text, warn) {
+    statusEl.textContent = text || " ";
+    statusEl.classList.toggle("warn", !!warn);
+  }
+  function savedStamp() {
+    var d = new Date();
+    setStatus("Saved " + pad(d.getHours()) + ":" + pad(d.getMinutes()));
+  }
+
+  /* ---------- the sheet ---------- */
+  function sheetFocused() {
+    var a = document.activeElement;
+    return !!a && a.closest && !!a.closest(".sheet");
+  }
+
+  function renderSheetHead() {
+    var dt = dateFromKey(selected);
+    $("dnum").textContent = dt.getDate();
+    $("dwd").textContent = WDS[mondayIndex(dt)];
+    $("dmy").textContent = MONTHS[dt.getMonth()] + " " + dt.getFullYear();
+    var chip = $("dchip");
+    chip.hidden = false;
+    chip.className = "chip";
+    if (selected === todayKey) { chip.textContent = "Today"; }
+    else if (selected > todayKey) { chip.textContent = "Ahead"; chip.classList.add("ahead"); }
+    else { chip.textContent = "Past day"; chip.classList.add("past"); }
+  }
+
+  function autoGrow(el) {
+    el.style.height = "auto";
+    el.style.height = (el.scrollHeight + 2) + "px";
+  }
+  function sizeTextareas() {
+    ["fImpressions", "fLiked", "fDisliked"].forEach(function (id) { autoGrow($(id)); });
+  }
+
+  function syncFields() {
+    var e = entryOf(selected);
+    [["fImpressions", "impressions"], ["fLiked", "liked"], ["fDisliked", "disliked"]]
+      .forEach(function (pair) {
+        var el = $(pair[0]);
+        var v = e[pair[1]] || "";
+        if (el !== document.activeElement && el.value !== v) { el.value = v; }
+        autoGrow(el);
+        el.readOnly = readOnly;
+      });
+  }
+
+  function renderTasks() {
+    var e = entryOf(selected);
+    var list = $("taskList");
+    list.textContent = "";
+    var done = 0;
+    (e.tasks || []).forEach(function (t) {
+      if (t.done) done++;
+      var li = document.createElement("li");
+      if (t.done) li.className = "done";
+
+      var tick = document.createElement("button");
+      tick.type = "button";
+      tick.className = "tick";
+      tick.setAttribute("aria-pressed", t.done ? "true" : "false");
+      tick.setAttribute("aria-label", t.done ? "Mark not done" : "Mark done");
+      tick.textContent = t.done ? "✓" : "";
+      tick.addEventListener("click", function () {
+        var cur = mutate(selected).tasks.filter(function (x) { return x.id === t.id; })[0];
+        if (!cur) return;
+        cur.done = !cur.done;
+        queueSave(selected);
+        renderTasks();
+        paintDay(selected);
+      });
+
+      var inp = document.createElement("input");
+      inp.type = "text";
+      inp.className = "ttext";
+      inp.value = t.text;
+      inp.readOnly = readOnly;
+      inp.setAttribute("aria-label", "Task");
+      inp.addEventListener("input", function () {
+        var cur = mutate(selected).tasks.filter(function (x) { return x.id === t.id; })[0];
+        if (cur) { cur.text = inp.value; queueSave(selected); }
+      });
+
+      var kill = document.createElement("button");
+      kill.type = "button";
+      kill.className = "kill";
+      kill.setAttribute("aria-label", "Remove task");
+      kill.textContent = "×";
+      kill.addEventListener("click", function () {
+        var en = mutate(selected);
+        en.tasks = en.tasks.filter(function (x) { return x.id !== t.id; });
+        queueSave(selected);
+        renderTasks();
+        paintDay(selected);
+      });
+
+      li.appendChild(tick);
+      li.appendChild(inp);
+      if (!readOnly) li.appendChild(kill);
+      list.appendChild(li);
+    });
+
+    var n = (e.tasks || []).length;
+    $("taskHint").hidden = n > 0;
+    $("taskCount").textContent = n ? done + "/" + n : "";
+    $("taskAdd").disabled = readOnly;
+    $("taskAddBtn").disabled = readOnly;
+  }
+
+  function addTask() {
+    var inp = $("taskAdd");
+    var text = inp.value.trim();
+    if (!text || readOnly) return;
+    mutate(selected).tasks.push({ id: uid(), text: text, done: false });
+    inp.value = "";
+    queueSave(selected);
+    renderTasks();
+    paintDay(selected);
+    inp.focus();
+  }
+  $("taskAddBtn").addEventListener("click", addTask);
+  $("taskAdd").addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter") { ev.preventDefault(); addTask(); }
+  });
+
+  [["fImpressions", "impressions"], ["fLiked", "liked"], ["fDisliked", "disliked"]]
+    .forEach(function (pair) {
+      var el = $(pair[0]);
+      el.addEventListener("input", function () {
+        mutate(selected)[pair[1]] = el.value;
+        autoGrow(el);
+        queueSave(selected);
+        paintDay(selected);
+      });
+    });
+
+  function select(k) {
+    if (k === selected) return;
+    flushNow();
+    selected = k;
+    var y = +k.slice(0, 4);
+    if (y !== year) { year = y; $("yearInput").value = year; renderYear(); }
+    renderSheetHead();
+    renderTasks();
+    syncFields();
+    paintSelection();
+  }
+  function shiftDay(n) {
+    var dt = dateFromKey(selected);
+    dt.setDate(dt.getDate() + n);
+    select(keyFromDate(dt));
+  }
+  $("prevDay").addEventListener("click", function () { shiftDay(-1); });
+  $("nextDay").addEventListener("click", function () { shiftDay(1); });
+  $("todayBtn").addEventListener("click", function () {
+    select(todayKey);
+    document.querySelector(".cell.now") &&
+      document.querySelector(".cell.now").scrollIntoView({ block: "center", behavior: "smooth" });
+  });
+
+  document.addEventListener("keydown", function (ev) {
+    var a = document.activeElement;
+    if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA")) return;
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (ev.key === "ArrowLeft") { ev.preventDefault(); shiftDay(-1); }
+    else if (ev.key === "ArrowRight") { ev.preventDefault(); shiftDay(1); }
+    else if (ev.key === "ArrowUp") { ev.preventDefault(); shiftDay(-7); }
+    else if (ev.key === "ArrowDown") { ev.preventDefault(); shiftDay(7); }
+  });
+
+  /* ---------- year grid ---------- */
+  function renderYear() {
+    var host = $("months");
+    host.textContent = "";
+    cellMap.clear();
+    $("yearTitle").textContent = year;
+
+    var nowY = +todayKey.slice(0, 4);
+    var nowM = +todayKey.slice(5, 7) - 1;
+    var nowD = +todayKey.slice(8, 10);
+    var isNowYear = year === nowY;
+
+    for (var m = 0; m < 12; m++) {
+      var card = document.createElement("section");
+      card.className = "month" + (isNowYear && m === nowM ? " is-now" : "");
+
+      var head = document.createElement("header");
+      var h3 = document.createElement("h3");
+      h3.textContent = MONTHS[m];
+      var mc = document.createElement("span");
+      mc.className = "mc";
+      head.appendChild(h3);
+      head.appendChild(mc);
+      card.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "mgrid";
+
+      var first = mondayIndex(new Date(year, m, 1));
+      var total = daysInMonth(year, m);
+      var weeks = Math.ceil((first + total) / 7);
+
+      var nowCol = -1, nowRow = -1;
+      if (isNowYear && m === nowM) {
+        nowCol = mondayIndex(new Date(year, m, nowD));
+        nowRow = Math.floor((first + nowD - 1) / 7);
+        grid.style.gridTemplateColumns = WDL.map(function (_, i) {
+          return i === nowCol ? "minmax(0, 1.55fr)" : "minmax(0, 1fr)";
+        }).join(" ");
+        var rows = ["auto"];
+        for (var r = 0; r < weeks; r++) {
+          rows.push(r === nowRow ? "var(--rowh-now)" : "var(--rowh)");
+        }
+        grid.style.gridTemplateRows = rows.join(" ");
+      }
+
+      for (var w = 0; w < 7; w++) {
+        var wd = document.createElement("div");
+        wd.className = "wd" + (w > 4 ? " we" : "");
+        wd.textContent = WDL[w];
+        wd.title = WDS[w];
+        wd.style.gridColumn = String(w + 1);
+        wd.style.gridRow = "1";
+        grid.appendChild(wd);
+      }
+
+      for (var d = 1; d <= total; d++) {
+        var idx = first + d - 1;
+        var col = idx % 7;
+        var row = Math.floor(idx / 7);
+        var k = keyOf(year, m, d);
+        var cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "cell";
+        cell.dataset.key = k;
+        cell.style.gridColumn = String(col + 1);
+        cell.style.gridRow = String(row + 2);
+        cell.setAttribute("aria-label", WDS[col] + " " + MONTHS[m] + " " + d + ", " + year);
+
+        if (nowRow >= 0 && row === nowRow) cell.classList.add("in-row");
+        if (nowCol >= 0 && col === nowCol) cell.classList.add("in-col");
+
+        if (k === todayKey) {
+          cell.classList.add("now");
+          var nnum = document.createElement("div");
+          nnum.className = "nnum";
+          nnum.textContent = d;
+          var nbody = document.createElement("div");
+          nbody.className = "nbody";
+          var nlabel = document.createElement("div");
+          nlabel.className = "nlabel";
+          var nmarks = document.createElement("div");
+          nmarks.className = "nmarks";
+          for (var s = 0; s < 3; s++) nmarks.appendChild(document.createElement("span"));
+          var nline = document.createElement("div");
+          nline.className = "nline";
+          nbody.appendChild(nlabel);
+          nbody.appendChild(nmarks);
+          nbody.appendChild(nline);
+          cell.appendChild(nnum);
+          cell.appendChild(nbody);
+        } else {
+          cell.textContent = d;
+          if (k > todayKey) cell.classList.add("future");
+        }
+
+        cell.addEventListener("click", function (ev) {
+          select(ev.currentTarget.dataset.key);
+        });
+        grid.appendChild(cell);
+        cellMap.set(k, cell);
+      }
+
+      card.appendChild(grid);
+      card.dataset.month = String(m);
+      host.appendChild(card);
+    }
+    paintAll();
+  }
+
+  function firstLine(e) {
+    var t = (e.impressions || "").trim() || (e.liked || "").trim() || (e.disliked || "").trim();
+    if (t) return t;
+    var open = (e.tasks || []).filter(function (x) { return !x.done; })[0];
+    return open ? open.text : "";
+  }
+
+  function paintDay(k) {
+    var cell = cellMap.get(k);
+    if (!cell) return;
+    var e = entries.get(k);
+    var filled = !!e && !isEmpty(e);
+    if (k === todayKey) {
+      var tasks = (e && e.tasks) || [];
+      var done = tasks.filter(function (x) { return x.done; }).length;
+      cell.querySelector(".nlabel").textContent =
+        tasks.length ? done + " of " + tasks.length + " done" : (filled ? "Written" : "Today");
+      var marks = cell.querySelectorAll(".nmarks span");
+      var on = [!!(e && e.impressions && e.impressions.trim()),
+        !!(e && e.liked && e.liked.trim()),
+        !!(e && e.disliked && e.disliked.trim())];
+      for (var i = 0; i < marks.length; i++) marks[i].classList.toggle("on", on[i]);
+      cell.querySelector(".nline").textContent = e ? firstLine(e) : "";
+    } else {
+      cell.classList.toggle("has", filled);
+    }
+    paintMonthCount(+k.slice(5, 7) - 1);
+    paintYearStat();
+  }
+
+  function paintYearStat() {
+    var pre = year + "-";
+    var n = 0;
+    entries.forEach(function (e, k) { if (k.indexOf(pre) === 0 && !isEmpty(e)) n++; });
+    $("yearStat").textContent = n === 0 ? "nothing written yet"
+      : n === 1 ? "1 day written" : n + " days written";
+  }
+
+  function paintMonthCount(m) {
+    var card = $("months").querySelector('.month[data-month="' + m + '"]');
+    if (!card) return;
+    var pre = year + "-" + pad(m + 1) + "-";
+    var n = 0;
+    entries.forEach(function (e, k) {
+      if (k.indexOf(pre) === 0 && !isEmpty(e)) n++;
+    });
+    card.querySelector(".mc").textContent = n ? n + " · written" : "";
+  }
+
+  function paintSelection() {
+    var prev = $("months").querySelector(".cell.sel");
+    if (prev) prev.classList.remove("sel");
+    var cell = cellMap.get(selected);
+    if (cell) cell.classList.add("sel");
+  }
+
+  function paintAll() {
+    cellMap.forEach(function (cell, k) { paintDay(k); });
+    for (var m = 0; m < 12; m++) paintMonthCount(m);
+    paintSelection();
+    paintYearStat();
+  }
+
+  /* ---------- year nav ---------- */
+  function goYear(y) {
+    if (!isFinite(y)) return;
+    y = Math.max(1, Math.min(9999, Math.round(y)));
+    if (y === year) return;
+    year = y;
+    $("yearInput").value = y;
+    renderYear();
+  }
+  $("prevYear").addEventListener("click", function () { goYear(year - 1); });
+  $("nextYear").addEventListener("click", function () { goYear(year + 1); });
+  $("yearInput").addEventListener("change", function () { goYear(+$("yearInput").value); });
+  $("yearInput").addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter") { goYear(+$("yearInput").value); $("yearInput").blur(); }
+  });
+
+  /* ---------- storage ---------- */
+  function body(k, e) {
+    return {
+      date: k,
+      tasks: (e.tasks || []).map(function (t) {
+        return { id: t.id, text: t.text, done: !!t.done };
+      }),
+      impressions: e.impressions || "",
+      liked: e.liked || "",
+      disliked: e.disliked || "",
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function queueSave(k) {
+    dirty.add(k);
+    if (!db) { setStatus(readOnly ? "Read only" : "Not saved", true); return; }
+    setStatus("Saving…");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushNow, 700);
+  }
+
+  function flushNow() {
+    clearTimeout(saveTimer);
+    if (!db || flushing || dirty.size === 0) return;
+    flushing = true;
+    var keys = Array.prototype.slice.call(dirty);
+    dirty.clear();
+    (function step(i) {
+      if (i >= keys.length) {
+        flushing = false;
+        if (dirty.size) { flushNow(); } else { savedStamp(); }
+        return;
+      }
+      var k = keys[i];
+      var e = entries.get(k);
+      var ref = db.collection("entries").doc(k);
+      var p = (!e || isEmpty(e)) ? ref.delete() : ref.set(body(k, e));
+      p.then(function () { step(i + 1); }, function (err) {
+        flushing = false;
+        if (err && (err.code === "invalid_argument" || err.code === "revoked" ||
+          err.code === "not_granted")) {
+          readOnly = true;
+          showNotice("This journal is open for reading only here — changes you make now stay in this tab.");
+          renderTasks();
+          syncFields();
+          setStatus("Read only", true);
+        } else {
+          setStatus("Save failed", true);
+        }
+      });
+    })(0);
+  }
+  window.addEventListener("beforeunload", flushNow);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") flushNow();
+  });
+
+  function showNotice(text) {
+    var n = $("notice");
+    n.textContent = text;
+    n.hidden = false;
+  }
+
+  function adopt(snap) {
+    var incoming = new Set();
+    snap.docs.forEach(function (d) {
+      incoming.add(d.id);
+      if (dirty.has(d.id)) return;
+      if (d.id === selected && sheetFocused()) return;
+      var v = d.data() || {};
+      entries.set(d.id, {
+        tasks: Array.isArray(v.tasks) ? v.tasks.map(function (t) {
+          return { id: t && t.id ? t.id : uid(), text: (t && t.text) || "", done: !!(t && t.done) };
+        }) : [],
+        impressions: typeof v.impressions === "string" ? v.impressions : "",
+        liked: typeof v.liked === "string" ? v.liked : "",
+        disliked: typeof v.disliked === "string" ? v.disliked : ""
+      });
+    });
+    entries.forEach(function (e, k) {
+      if (!incoming.has(k) && !dirty.has(k)) entries.delete(k);
+    });
+    paintAll();
+    if (!sheetFocused()) { renderTasks(); syncFields(); }
+  }
+
+  /* ---------- boot ---------- */
+  $("yearInput").value = year;
+  renderSheetHead();
+  renderTasks();
+  syncFields();
+  renderYear();
+  setStatus("Loading…");
+
+  if (window.claude && window.claude.use) {
+    loadTimer = setTimeout(function () {
+      setStatus("Offline", true);
+      showNotice("Can't reach the journal's storage right now. What you write stays in this tab until it comes back.");
+    }, 10000);
+
+    window.claude.use("db").then(function (store) {
+      if (!store) {
+        clearTimeout(loadTimer);
+        setStatus("Local only", true);
+        showNotice("Storage isn't available in this view, so today's writing stays in this tab only.");
+        return;
+      }
+      db = store;
+      try {
+        db.collection("entries").onSnapshot(function (snap) {
+          if (!snap.metadata.fromCache) { clearTimeout(loadTimer); $("notice").hidden = true; }
+          adopt(snap);
+          if (dirty.size === 0 && !flushing) setStatus("Saved");
+        }, function (err) {
+          clearTimeout(loadTimer);
+          setStatus("Offline", true);
+          showNotice("The journal's storage stopped answering (" +
+            ((err && err.code) || "unknown") + "). Reload the page to try again.");
+        });
+      } catch (err) {
+        clearTimeout(loadTimer);
+        setStatus("Local only", true);
+      }
+    }, function () {
+      clearTimeout(loadTimer);
+      setStatus("Local only", true);
+    });
+
+    window.claude.use("user").then(function (u) {
+      if (!u) return;
+      try {
+        var w = u.can && u.can("data.write");
+        Promise.resolve(w).then(function (ok) {
+          if (ok === false) {
+            readOnly = true;
+            showNotice("You're viewing this journal, not writing in it.");
+            renderTasks();
+            syncFields();
+            setStatus("Read only");
+          }
+        }, function () { /* never mind */ });
+      } catch (err) { /* ignore */ }
+    }, function () { /* ignore */ });
+  } else {
+    setStatus("Local only", true);
+    $("dbNote").textContent = "Local preview — nothing is saved";
+  }
+
+  window.addEventListener("resize", sizeTextareas);
+})();
+</script>
