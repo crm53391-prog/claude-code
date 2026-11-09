@@ -295,8 +295,9 @@ textarea::placeholder{color:var(--ink-faint)}
 .op .lab-easy{color:var(--done)}
 .srclink{font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);text-decoration:none}
 .srclink:hover{color:var(--rubric)}
-.offline{font-family:var(--naskh);font-size:.85rem;color:var(--doing);border:1px solid currentColor;
-  border-radius:2px;padding:.5rem .8rem;margin:1.2rem 0 0;display:none}
+.offline{font-family:var(--naskh);font-size:.88rem;line-height:1.65;color:var(--doing);
+  border:1px solid currentColor;border-radius:2px;padding:.6rem .85rem;margin:0 auto 1.6rem;
+  max-width:min(70rem,100%);display:none}
 .offline.show{display:block}
 </style>
 
@@ -310,8 +311,8 @@ textarea::placeholder{color:var(--ink-faint)}
       <button class="tgl" id="theme" type="button" title="بدّل الثيم" aria-label="بدّل الثيم"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M8 1.6a6.4 6.4 0 0 1 0 12.8Z" fill="currentColor"></path></svg></button>
     </nav>
   </header>
+  <p class="offline" id="offline"></p>
   <main id="view"></main>
-  <p class="offline" id="offline">ما قدرتش نوصل للملاحظات المحفوظين. اللي كتشوف دابا يمكن ماشي آخر نسخة.</p>
 </div>
 
 <script>
@@ -362,7 +363,7 @@ const ALL = MODULES.flatMap(m => m.lessons);
 const BY_ID = Object.fromEntries(ALL.map(l => [l.id, l]));
 
 /* ── state ───────────────────────────────────────────────── */
-const S = {lessons:{}, modules:{}, prefs:{}, loaded:false, writable:null};
+const S = {lessons:{}, modules:{}, prefs:{}, loaded:false};
 let db = null, stale = false;
 
 function les(id){ return S.lessons[id] || {}; }
@@ -421,61 +422,85 @@ function typeset(src){
 /* ── writes ──────────────────────────────────────────────── */
 const local = {};            /* path -> last known body */
 const queue = {};            /* path -> {dirty, running, timer} */
+const DRAFT = "s3d:";        /* unsent writes, parked in this browser */
 let saveTick = null;
 
-function showSaving(on, done){
+function applyLocal(path, body){
+  if (path.indexOf("lessons/") === 0) S.lessons[path.slice(8)] = body;
+  else if (path.indexOf("modules/") === 0) S.modules[path.slice(8)] = body;
+  else if (path === "meta/prefs") S.prefs = body;
+}
+function saveDraft(path){ try { localStorage.setItem(DRAFT + path, JSON.stringify(local[path])); } catch(e){} }
+function clearDraft(path){ try { localStorage.removeItem(DRAFT + path); } catch(e){} }
+function loadDrafts(){
+  try {
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if (!k || k.indexOf(DRAFT) !== 0) continue;
+      const body = JSON.parse(localStorage.getItem(k) || "null");
+      if (!body || typeof body !== "object") continue;
+      const path = k.slice(DRAFT.length);
+      local[path] = body; applyLocal(path, body);
+      (queue[path] || (queue[path] = {dirty:false, running:false, timer:0})).dirty = true;
+    }
+  } catch(e){}
+}
+function showSaving(on, done, msg){
   const el = document.getElementById("save");
   if (!el) return;
-  el.textContent = on ? "كيتسجّل…" : (done ? "تسجّل ✓" : "");
-  el.className = "save" + (!on && done ? " on" : "");
-  if (!on && done){
+  const ok = !on && done && !msg;
+  el.textContent = on ? "كيتسجّل…" : (msg || (done ? "تسجّل ✓" : ""));
+  el.className = "save" + (ok ? " on" : "");
+  if (ok){
     clearTimeout(saveTick);
     saveTick = setTimeout(() => { if (el.isConnected && el.textContent === "تسجّل ✓") el.textContent = ""; }, 2600);
   }
 }
-
-function patch(path, body, cache, key){
-  if (S.writable === false) return;
+function unchanged(path, body){
+  const cur = local[path] || {};
+  return Object.keys(body).every(k => cur[k] === body[k]);
+}
+/* Never block typing: a write that cannot reach the store is parked in this
+   browser and pushed up the next time the store answers. */
+function patch(path, body){
+  if (unchanged(path, body)) return;
   local[path] = Object.assign({}, local[path], body);
-  if (cache) cache[key] = Object.assign({}, cache[key], body);
+  applyLocal(path, local[path]);
   const q = queue[path] || (queue[path] = {dirty:false, running:false, timer:0});
   q.dirty = true;
   clearTimeout(q.timer);
   showSaving(true);
-  q.timer = setTimeout(() => flush(path), 650);
+  q.timer = setTimeout(() => { saveDraft(path); flush(path); }, 600);
 }
 async function flush(path){
   const q = queue[path];
   if (!q || q.running || !q.dirty) return;
-  if (!db){ q.dirty = false; showSaving(false, false); return; }
+  if (!db){ saveDraft(path); showSaving(false, false, "محفوظ فهاد الجهاز"); return; }
   q.running = true;
   while (q.dirty){
     q.dirty = false;
     const body = Object.assign({}, local[path], {u: Date.now()});
     try { await db.doc(path).set(body); }
     catch (e){
-      q.running = false; showSaving(false, false);
-      if (e && e.code === "invalid_argument") S.writable = false;
-      flash("ما تسجّلتش. عاود جرّب.");
+      q.dirty = true; q.running = false; saveDraft(path);
+      showSaving(false, false, "ما تسجّلش ✕");
+      note("ما قدرتش نسجّل فالسحابة" + (e && e.code ? " (" + e.code + ")" : "") +
+        ". اللي كتبتي محفوظ فهاد النافيغاتور وما غاديش يضيع — حلّ الصفحة من داخل Claude وغادي يطلع وحدو.");
       return;
     }
   }
-  q.running = false;
+  q.running = false; clearDraft(path);
   showSaving(false, true);
 }
-function flash(msg){
+function flushAll(){ Object.keys(queue).forEach(p => { if (queue[p].dirty) flush(p); }); }
+function note(msg){
   const el = document.getElementById("offline");
   if (!el) return; el.textContent = msg; el.classList.add("show");
 }
 
-const setLesson = (id, body) => patch("lessons/" + id, body, S.lessons, id);
-const setModule = (id, body) => patch("modules/" + id, body, S.modules, id);
-const setPrefs  = body => { if (S.writable === false) return;
-  local["meta/prefs"] = Object.assign({}, local["meta/prefs"], body);
-  S.prefs = Object.assign({}, S.prefs, body);
-  const q = queue["meta/prefs"] || (queue["meta/prefs"] = {dirty:false, running:false, timer:0});
-  q.dirty = true; clearTimeout(q.timer); q.timer = setTimeout(() => flush("meta/prefs"), 400);
-};
+const setLesson = (id, body) => patch("lessons/" + id, body);
+const setModule = (id, body) => patch("modules/" + id, body);
+const setPrefs  = body => patch("meta/prefs", body);
 
 /* ── views ───────────────────────────────────────────────── */
 const view = document.getElementById("view");
@@ -604,7 +629,7 @@ function renderModule(m){
     '<span class="ornament">❖</span>';
 
   const t = document.getElementById("op");
-  t.value = op; lockIf(t);
+  t.value = op;
   t.addEventListener("input", () => setModule(m.id, {opinion:t.value}));
 }
 
@@ -666,7 +691,7 @@ function renderLesson(l){
         '<code>- لائحة</code> · <code>1. مرتّبة</code> · <code>&gt; اقتباس</code> · <code>! مهم</code> · ' +
         '<code>**غليظ**</code> · <code>*مايل*</code> · <code>==معلّم==</code> · <code>---</code> فاصل</p>';
       const ta = body.firstChild;
-      ta.value = (les(l.id).note || ""); lockIf(ta);
+      ta.value = (les(l.id).note || "");
       ta.addEventListener("input", () => setLesson(l.id, {note:ta.value}));
     } else {
       const src = (les(l.id).note || "").trim();
@@ -700,7 +725,7 @@ function renderLesson(l){
   });
 
   const h = document.getElementById("hard"), ez = document.getElementById("easy");
-  h.value = d.hard || ""; ez.value = d.easy || ""; lockIf(h); lockIf(ez);
+  h.value = d.hard || ""; ez.value = d.easy || "";
   h.addEventListener("input", () => setLesson(l.id, {hard:h.value}));
   ez.addEventListener("input", () => setLesson(l.id, {easy:ez.value}));
 }
@@ -742,8 +767,6 @@ function renderAray(){
         : '<p class="hint">دخل لشي موديول وكتب رأيك فيه، وغادي يبان هنا.</p>') + "</section>" +
     '<span class="ornament">❖ ❖ ❖</span>';
 }
-
-function lockIf(el){ if (S.writable === false){ el.readOnly = true; el.title = "القراية فقط"; } }
 
 /* ── router ──────────────────────────────────────────────── */
 function render(){
@@ -799,6 +822,7 @@ addEventListener("keydown", e => {
   }
 });
 
+loadDrafts();
 render();
 
 /* ── store ───────────────────────────────────────────────── */
@@ -806,14 +830,19 @@ async function useCap(name){
   try { return (await window.claude?.use?.(name)) || null; } catch(e){ return null; }
 }
 (async () => {
-  const user = await useCap("user");
-  if (user){
-    try { const w = await user.can("data.write"); if (w === false) S.writable = false; } catch(e){}
-  }
   db = await useCap("db");
-  if (!db){ S.loaded = true; S.writable = false; stale = true; safeRender(); return; }
+  if (!db){
+    S.loaded = true;
+    note("هاد الصفحة محلولة برّا Claude، ولهذا ما كتوصلش للنوت المحفوظين فالسحابة. تقدر تكتب عادي — كلشي كيتسجل فهاد النافيغاتور وغادي يطلع للسحابة بوحدو ملي تحلّها من داخل Claude.");
+    safeRender(); return;
+  }
+  flushAll();   /* push anything written while the store was out of reach */
 
-  const timer = setTimeout(() => { stale = true; safeRender(); }, 10000);
+  const timer = setTimeout(() => {
+    stale = true;
+    note("ما قدرتش نوصل للنوت المحفوظين. اللي كتشوف دابا يمكن ماشي آخر نسخة.");
+    safeRender();
+  }, 10000);
   const settle = () => { clearTimeout(timer); stale = false; S.loaded = true;
     document.getElementById("offline").classList.remove("show"); safeRender(); };
   const busy = p => !!(queue[p] && (queue[p].dirty || queue[p].running));
@@ -825,7 +854,12 @@ async function useCap(name){
       S.lessons[d.id] = d.data() || {}; local[p] = S.lessons[d.id];
     });
     if (!snap.metadata.fromCache) settle(); else safeRender();
-  }, e => { stale = true; S.loaded = true; if (e && e.code === "revoked") S.writable = false; safeRender(); });
+  }, e => {
+    stale = true; S.loaded = true;
+    note("ما قدرتش نوصل للنوت المحفوظين" + (e && e.code ? " (" + e.code + ")" : "") +
+      ". اللي كتكتب دابا محفوظ فهاد النافيغاتور.");
+    safeRender();
+  });
 
   db.collection("modules").onSnapshot(snap => {
     snap.docs.forEach(d => {
