@@ -39,11 +39,23 @@
   color-scheme:dark;
 }
 
+/* The UI reads in Arabic, French or English; Arabic sets the naskh face and
+   RTL, the two Latin languages take the serif and the small-caps label
+   register the design was drawn with. Course names stay French throughout. */
+:root[lang="fr"],:root[lang="en"]{--naskh:'Spectral','Noto Naskh Arabic','Iowan Old Style',Georgia,serif}
+:root[lang="fr"] .field label,:root[lang="en"] .field label,
+:root[lang="fr"] .ctl > span,:root[lang="en"] .ctl > span,
+:root[lang="fr"] .card .lab,:root[lang="en"] .card .lab,
+:root[lang="fr"] .pager .k,:root[lang="en"] .pager .k,
+:root[lang="fr"] .op .lab-hard,:root[lang="en"] .op .lab-hard,
+:root[lang="fr"] .op .lab-easy,:root[lang="en"] .op .lab-easy{
+  font-family:var(--mono);font-size:.65rem;letter-spacing:.16em;text-transform:uppercase}
+
 *{box-sizing:border-box}
 body{
   margin:0; background:var(--paper); color:var(--ink);
   font-family:var(--serif); font-size:17px; line-height:1.62;
-  direction:rtl; text-rendering:optimizeLegibility;
+  text-rendering:optimizeLegibility;
   -webkit-font-smoothing:antialiased;
   padding-left:max(18px,env(safe-area-inset-left,0px));
   padding-right:max(18px,env(safe-area-inset-right,0px));
@@ -72,6 +84,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tgl{background:none;border:1px solid var(--rule);color:var(--ink-soft);border-radius:2px;
   padding:.3rem .45rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .tgl:hover{color:var(--ink);border-color:var(--ink-faint)}
+.langs{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;margin-inline:.4rem .15rem}
+.langs button{appearance:none;background:none;border:0;border-inline-start:1px solid var(--rule);
+  font-family:var(--mono);font-size:.67rem;letter-spacing:.06em;color:var(--ink-faint);
+  padding:.32rem .45rem;cursor:pointer;line-height:1.25}
+.langs button:first-child{border-inline-start:0}
+.langs button:hover{color:var(--ink);background:var(--leaf)}
+.langs button[aria-pressed="true"]{color:var(--rubric);background:var(--leaf)}
 
 main{max-width:min(70rem,100%);margin:0 auto}
 a{color:var(--indigo)}
@@ -253,7 +272,7 @@ textarea::placeholder{color:var(--ink-faint)}
   font-style:italic;color:var(--ink-soft)}
 .typeset .flag{margin:1.3em 0;padding:.75em 1em;background:color-mix(in srgb,var(--rubric) 7%,transparent);
   border:1px solid color-mix(in srgb,var(--rubric) 28%,transparent);border-radius:2px}
-.typeset .flag::before{content:"مهم";display:block;font-family:var(--naskh);font-size:.8rem;
+.typeset .flaglab{display:block;font-family:var(--naskh);font-size:.8rem;
   font-weight:700;color:var(--rubric);margin-bottom:.15em}
 .typeset mark{background:color-mix(in srgb,var(--doing) 26%,transparent);color:inherit;padding:0 .12em}
 .typeset code{font-family:var(--mono);font-size:.86em;background:var(--leaf-2);padding:.08em .32em;border-radius:2px}
@@ -301,14 +320,32 @@ textarea::placeholder{color:var(--ink-faint)}
 .offline.show{display:block}
 </style>
 
+<script>
+/* direction and language before the first paint, so nothing flips on load */
+try {
+  var v = localStorage.getItem("s3-lang");
+  var L = (v === "fr" || v === "en") ? v : "ar";
+  document.documentElement.setAttribute("dir", L === "ar" ? "rtl" : "ltr");
+  document.documentElement.setAttribute("lang", L);
+} catch (e) {
+  document.documentElement.setAttribute("dir", "rtl");
+  document.documentElement.setAttribute("lang", "ar");
+}
+</script>
+
 <div class="spine" aria-hidden="true"></div>
-<div dir="rtl">
+<div>
   <header class="bar">
-    <p class="brand">كراسة الطب <b>S3</b></p>
+    <p class="brand" id="brand"></p>
     <nav>
-      <a class="nlink" href="#fihris" data-v="fihris">الفهرس</a>
-      <a class="nlink" href="#aray" data-v="aray">الآراء</a>
-      <button class="tgl" id="theme" type="button" title="بدّل الثيم" aria-label="بدّل الثيم"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M8 1.6a6.4 6.4 0 0 1 0 12.8Z" fill="currentColor"></path></svg></button>
+      <a class="nlink" href="#fihris" data-v="fihris" id="nav-fihris"></a>
+      <a class="nlink" href="#aray" data-v="aray" id="nav-aray"></a>
+      <span class="langs" id="langs" role="group" aria-label="Language">
+        <button type="button" data-l="ar" title="العربية">AR</button>
+        <button type="button" data-l="fr" title="Français">FR</button>
+        <button type="button" data-l="en" title="English">EN</button>
+      </span>
+      <button class="tgl" id="theme" type="button"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M8 1.6a6.4 6.4 0 0 1 0 12.8Z" fill="currentColor"></path></svg></button>
     </nav>
   </header>
   <p class="offline" id="offline"></p>
@@ -319,18 +356,201 @@ textarea::placeholder{color:var(--ink-faint)}
 "use strict";
 const RAW = [{"fr":"Anatomie III","ar":"التشريح 3","sections":[{"label":null,"groups":[{"prof":"Pr.Hammoud","courses":["Développement embryonaire du SNC","La moelle spinale","Le cerveau","Le tronc cérébral","Le cervelet","Vascularisation de l'encéphale","Retour Veineux du cerveau"]},{"prof":"Pr.Alami","courses":["Region topographique","Fascias du cou","Larynx","Pharynx","Muscules du cou","Region carotidienne \" contenu artérielles, veineuses, neurveux, lymphatiques \"","Region sus claviculaire \" contenu artérielles, veineuses, neurveux, lymphatiques \"","Glande thyroïde","la nuque","la région parotidienne","la cavité buccale","Cavités nasales","Appareil de vision"]}]}]},{"fr":"Sémiologie I","ar":"السيميولوجيا 1","sections":[{"label":"Sémio de l'appareil locomoteur","groups":[{"prof":"Pr. Idrissi","courses":["Sémiologie de la hanche"]},{"prof":"Pr. Abid","courses":["Généralités sur les fractures","Sémiologie pied et cheville"]},{"prof":"Pr. Boutayeb","courses":["Examen clinique du genou","Examen clinique de l'épaule"]},{"prof":"Pr. Lahrach","courses":["Examen clinique du coude"]}]},{"label":"Sémio Gastro-entérique","groups":[{"prof":"Pr. Abkari","courses":["Sémiologie proctologique","Diarrhées aigues","Hémorragies internes"]},{"prof":"Pr. Lahmidani","courses":["Les ascites","Nausées et vomissements"]},{"prof":"Pr. El Yousfi","courses":["Examen clinique en patho digestive","Douleurs abdominales d'origine digestive"]},{"prof":"Pr. El Mekkaoui","courses":["Constipation","Dysphagie"]},{"prof":"Pr. Bennajeh","courses":["Hémorragies digestives","Le reflux gastro-oesophagien"]},{"prof":"Pr. Lamsiah","courses":["Les hépatomégalies","Les ictères"]}]},{"label":"Sémio visérale","groups":[{"prof":"Pr. Benjelloun","courses":["Les péritonites aigues","Occlusions intestinales aigues"]},{"prof":"Pr. Souiki","courses":["hemoragie interne","Traumatismes de l'abdomen","Hernies et éventrations ( 2 cours)"]}]},{"label":"Sémio cardio-vasculaire","groups":[{"prof":"Pr. Akoudad","courses":["Introduction générale","Douleur thoracique","La dyspnée","La syncope","Le cathétérisme cardiaque","Auscultation","ECG","L'écho-Doppler cardiaque","Examen clinique en cardiologie","La radiographie thoracique en pathologie cardiaque"]}]},{"label":"Sémio respiratoire","groups":[{"prof":"Pr. Amara","courses":["Sémiologie respiratoire (introduction)","douleurs thoraciques","hemoragie interne","la toux","Expectoration","Hemoptysies","L'examen Physique","Les grands syndromes"]}]}]},{"fr":"Physiologie II","ar":"الفيزيولوجيا 2","sections":[{"label":"Physiologie Rénale et Milieu Intérieur","groups":[{"prof":"Pr. El Bardai","courses":["Filtration glomurulaire","Anatomie Microscopique, Histologie et Fonctions des Reins"]},{"prof":"Pr.Allata","courses":["Métabolisme Phospho-Calcique","Equilibre Acido-Basique","Métabolisme du Potassium","Fonctions Endocrines du Rein et Rôle du Rein dans la Régulation de la Pression Artérielle"]},{"prof":"Pr. Chouhani","courses":["Fonctions Tubulaires"]},{"prof":"Pr. ElBardai","courses":["Régulation du Bilan Hydrique","Bilan du Sodium","Compartiments Liquidiens - Milieu Intérieur"]}]},{"label":"Physiologie Neurologique","groups":[{"prof":"Pr. El Midaoui","courses":["Organisation Générale du Système Nerveux","Physiologie de la Motricité","Physiologie de la Somesthésie","Physiologie du Système Nerveux Végétatif"]},{"prof":"Pr. Belahsen","courses":["Système Extra-Pyramidal","Physiologie du Sommeil","Physiologie du Cervelet et des Voies Cérébelleuses","Physiologie de la Mémoire","Physiologie du Langage"]}]},{"label":"Physiologie Endocrinienne","groups":[{"prof":"Pr. Chabir","courses":["Endocrinologie Générale","Physiologie de reproduction","Pancréas Endocrine","Corticosurrénales","Glande ou le Corps Thyroïde","Hormones Hypothalamo-Hypophysaires","Métabolisme Phosphocalcique"]}]}]},{"fr":"Biochimie clinique","ar":"الكيمياء الحيوية السريرية","sections":[{"label":null,"groups":[{"prof":"Pr. El Boukhrissi","courses":["Phase Pré-Analytique et Prélèvement en Biologie Clinique","Métabolisme de l’Eau et des éléctrolytes","Exploration Biochimique de l’Equilibre Acido-Basique","Ionogramme Sanguin","Exploration Biochimique du Métabolisme Phosphocalcique","Exploration Biochimique de la Fonction Rénale: Dosage de l'Urée & la Créatinine","Exploration biochimique du Métabolisme de l’Acide Urique","Exploration Biochimique du Métabolisme du Fer","Protéines Plasmatiques","Exploration Biochimique des Fonctions Hépatiques","Diabète Sucré","Biochimie du Liquide Céphalorachidien","Syndrome Biochimique de l'Infarctus du Myocarde","Exploration biochimique du métabolisme des lipoprotéines"]},{"prof":"Pr.Benbella","courses":["Exploration de la Médullosurrénale","Exploration Biochimique de la thyroide","Exploration biochimique de la grossesse","Exploration biochimique des testicules","Exploration biochimique des ovaires","Exploration Biochimique de la Corticosurrénale"]}]}]},{"fr":"Fonctions vitales et secourisme","ar":"الوظائف الحيوية والإسعافات الأولية","sections":[{"label":"Fonctions Vitales","groups":[{"prof":"Pr. Boukatta","courses":["Transport d'Oxygène","Physiopathologie des Hypoxies","Physiopathologie des Etats de Choc"]},{"prof":"Pr. El Bouazzaoui","courses":["Physiopathologie et Prévention des Infections Associées aux Soins"]},{"prof":"Pr. Derkaoui (Hybride)","courses":["Syndrome de Rhabdomyolyse"]},{"prof":"Pr. Shimi","courses":["HTIC","Physiopathologie de l’asthme aigu grave","Embolie pulmonaire"]},{"prof":"Pr. Harandou","courses":["Hémostase","Insuffisance Hépatique Aiguë","Insuffisance Rénale Aiguë","Homéostasie du Milieu Intérieur","Œdème aigu pulmonaire"]}]},{"label":"Secourisme","groups":[{"prof":"Pr. Harandou","courses":["Arrêt Cardiaque Extra-hopitalier Chez l’Adulte"]},{"prof":"Pr. El Bouazzaoui","courses":["Obstruction Accidentelle des VAS par un Corps Etranger","Victime Inconsciente qui respire","Hémorragie Externe","Evaluation initiale du polytraumatisé"]}]}]},{"fr":"Art et histoire de la médecine","ar":"فن وتاريخ الطب","sections":[{"label":null,"groups":[{"prof":"Pr. Fahmi","courses":["Axes"]},{"prof":"Pr. El Rhazi","courses":["Santé Publique"]},{"prof":"Pr. Benjelloun","courses":["تاريخ الطب الاسلامي..."]}]}]}];
 
+/* ── interface languages ─────────────────────────────────── */
+const I18N = {
+  ar: {
+    dir:"rtl",
+    brand:"كراسة الطب", navIndex:"الفهرس", navOps:"الآراء",
+    theme:"بدّل الثيم",
+    eyebrow:"Faculté de médecine · Semestre 3",
+    t1:"كراسة", t2:"الطب",
+    sub:n => "ستّة موديولات، " + n + " درس. كل درس فيه الصفحة ديالو: النوت، الحالة، وشنو صعيب وشنو ساهل فيه.",
+    of:n => "/ " + n + " درس خلّصتهم",
+    pct:p => p + "٪ من السيميستر", loading:"كنقلّب على النوت…",
+    done:"خلّصت", doing:"كنقرا", left:"باقي", last:"آخر درس فتحتو:",
+    qLabel:"قلّب على درس، أستاذ، ولا موديول", qPh:"مثلا: ECG، Pr. Akoudad، ictères…",
+    examLabel:"نهار الامتحان", cdPick:"حدّد النهار باش نحسبو ليك الباقي.",
+    cdDays:n => "باقي <b>" + n + "</b> نهار", cdTom:"غدا!", cdToday:"اليوم!",
+    cdPast:n => "فات بـ <b>" + n + "</b> نهار",
+    noHit:"ما لقيت حتى درس بهاد الكلمة.",
+    modules:"الموديولات", chapter:"CHAPITRE",
+    foot:(t,p) => t + " دروس · " + p + " profs", pctShort:p => p + "٪",
+    marked:"محطوطين بالعلامة",
+    markedHint:"حتى درس مازال. حيّد ✦ على شي درس بغيت ترجع ليه بسرعة وغادي يبان هنا.",
+    sLessons:n => n + " دروس", sProfs:n => n + " أساتذة",
+    sDone:n => "خلّصت " + n, sDoing:n => "كنقرا " + n, sLeft:n => "باقي " + n,
+    modOp:"رأيي في المادة كاملة",
+    modOpTip:"واش ثقيلة؟ منين تبدا؟ أي أستاذ مهم؟ — كتب هنا وكيتسجّل وحدو.",
+    modOpPh:"مثلا: الموديول طويل مي منظم، ابدا بـ…",
+    status:["باقية","كنقرا فيها","خلّصتها"],
+    diff:["ساهلة","لاباس","صعيبة","قاتلة"],
+    cStatus:"الحالة", cDiff:"صعوبتها", cMark:"علامة", markBtn:"✦ رجع ليها",
+    notes:"النوت ديالي", write:"كتب", read:"قراية", notePh:"كتب النوت ديالك هنا…",
+    noteEmpty:"مازال ما كتبتي حتى نوتة فهاد الدرس. دوز لـ«كتب» وبدا.",
+    syntax:'<code># عنوان</code> · <code>## عنوان صغير</code> · <code>### فرع</code> · ' +
+      '<code>- لائحة</code> · <code>1. مرتّبة</code> · <code>&gt; اقتباس</code> · <code>! مهم</code> · ' +
+      '<code>**غليظ**</code> · <code>*مايل*</code> · <code>==معلّم==</code> · <code>---</code> فاصل',
+    saving:"كيتسجّل…", saved:"تسجّل ✓", savedLocal:"محفوظ فهاد الجهاز", saveFail:"ما تسجّلش ✕",
+    lesOp:"رأيي في الدرس", lHard:"شنو صعيب فيه", lEasy:"شنو ساهل فيه",
+    phHard:"الجزء اللي كيعيّقني…", phEasy:"هادشي فهمتو من اللول…",
+    opTip:"كلشي كيبان مجموع فصفحة «الآراء».",
+    prev:"اللي قبل", next:"اللي من بعد",
+    opsEyebrow:"Mes remarques", opsTitle:"الآراء ديالي",
+    opsSub:"كلشي اللي كتبتي على الدروس مجموع فبلاصة واحدة — مزيان قبل الامتحان.",
+    opsHard:"دروس صعيبة", opsHardHint:"مازال ما علّمتي حتى درس بـ«صعيبة» ولا «قاتلة».",
+    opsEasy:"دروس ساهلة", opsEasyHint:"مازال ما علّمتي حتى درس بـ«ساهلة».",
+    opsSaid:"شنو صعيب وشنو ساهل",
+    opsSaidHint:"كتب فشي درس شنو صعيب فيه وشنو ساهل، وغادي يتجمع هنا.",
+    opsMods:"رأيي في كل مادة", opsModsHint:"دخل لشي موديول وكتب رأيك فيه، وغادي يبان هنا.",
+    sHard:"صعيب", sEasy:"ساهل", openPage:"افتح الصفحة", openMod:"افتح الموديول",
+    important:"مهم", tMarked:"محطوطة بالعلامة", tNote:"فيها نوت",
+    bNoStore:"هاد الصفحة محلولة برّا Claude، ولهذا ما كتوصلش للنوت المحفوظين فالسحابة. تقدر تكتب عادي — كلشي كيتسجل فهاد النافيغاتور وغادي يطلع للسحابة بوحدو ملي تحلّها من داخل Claude.",
+    bFail:c => "ما قدرتش نسجّل فالسحابة" + c + ". اللي كتبتي محفوظ فهاد النافيغاتور وما غاديش يضيع — حلّ الصفحة من داخل Claude وغادي يطلع وحدو.",
+    bStale:c => "ما قدرتش نوصل للنوت المحفوظين" + c + ". اللي كتشوف دابا يمكن ماشي آخر نسخة."
+  },
+  fr: {
+    dir:"ltr",
+    brand:"Carnet de médecine", navIndex:"Sommaire", navOps:"Mes avis",
+    theme:"Changer le thème",
+    eyebrow:"Faculté de médecine · Semestre 3",
+    t1:"Carnet de", t2:"médecine",
+    sub:n => "Six modules, " + n + " cours. Chaque cours a sa page : les notes, l'état, et ce qui est dur ou facile dedans.",
+    of:n => "/ " + n + " cours terminés",
+    pct:p => p + " % du semestre", loading:"Chargement des notes…",
+    done:"Terminés", doing:"En cours", left:"Restants", last:"Dernier cours ouvert :",
+    qLabel:"Chercher un cours, un prof ou un module", qPh:"ex. ECG, Pr. Akoudad, ictères…",
+    examLabel:"Date de l'examen", cdPick:"Choisis la date pour le compte à rebours.",
+    cdDays:n => "Encore <b>" + n + "</b> jours", cdTom:"Demain !", cdToday:"Aujourd'hui !",
+    cdPast:n => "Passé depuis <b>" + n + "</b> jours",
+    noHit:"Aucun cours ne correspond.",
+    modules:"Les modules", chapter:"CHAPITRE",
+    foot:(t,p) => t + " cours · " + p + " profs", pctShort:p => p + " %",
+    marked:"Mis de côté",
+    markedHint:"Rien pour l'instant. Marque un cours avec ✦ et il apparaîtra ici.",
+    sLessons:n => n + " cours", sProfs:n => n + " profs",
+    sDone:n => "Terminés " + n, sDoing:n => "En cours " + n, sLeft:n => "Restants " + n,
+    modOp:"Mon avis sur le module",
+    modOpTip:"Lourd ? Par où commencer ? Quel prof compte ? — écris ici, ça s'enregistre tout seul.",
+    modOpPh:"ex. module long mais bien rangé, commencer par…",
+    status:["À faire","En cours","Terminé"],
+    diff:["Facile","Moyen","Dur","Mortel"],
+    cStatus:"État", cDiff:"Difficulté", cMark:"Repère", markBtn:"✦ À revoir",
+    notes:"Mes notes", write:"Écrire", read:"Lire", notePh:"Écris tes notes ici…",
+    noteEmpty:"Rien d'écrit pour ce cours. Passe à « Écrire » pour commencer.",
+    syntax:'<code># titre</code> · <code>## sous-titre</code> · <code>### niveau 3</code> · ' +
+      '<code>- liste</code> · <code>1. numérotée</code> · <code>&gt; citation</code> · <code>! important</code> · ' +
+      '<code>**gras**</code> · <code>*italique*</code> · <code>==surligné==</code> · <code>---</code> séparateur',
+    saving:"Enregistrement…", saved:"Enregistré ✓", savedLocal:"Gardé sur cet appareil", saveFail:"Non enregistré ✕",
+    lesOp:"Mon avis sur ce cours", lHard:"Ce qui est dur", lEasy:"Ce qui est facile",
+    phHard:"la partie qui me bloque…", phEasy:"compris du premier coup…",
+    opTip:"Tout est rassemblé sur la page « Mes avis ».",
+    prev:"Précédent", next:"Suivant",
+    opsEyebrow:"Mes remarques", opsTitle:"Mes avis",
+    opsSub:"Tout ce que tu as écrit sur les cours, au même endroit — utile avant l'examen.",
+    opsHard:"Cours durs", opsHardHint:"Aucun cours marqué « Dur » ou « Mortel » pour l'instant.",
+    opsEasy:"Cours faciles", opsEasyHint:"Aucun cours marqué « Facile » pour l'instant.",
+    opsSaid:"Ce qui est dur, ce qui est facile",
+    opsSaidHint:"Note sur un cours ce qui est dur et ce qui est facile : tout se rassemble ici.",
+    opsMods:"Mon avis par module", opsModsHint:"Ouvre un module et écris ton avis : il apparaîtra ici.",
+    sHard:"Dur", sEasy:"Facile", openPage:"Ouvrir la page", openMod:"Ouvrir le module",
+    important:"Important", tMarked:"Mis de côté", tNote:"Contient des notes",
+    bNoStore:"Cette page est ouverte hors de Claude, elle ne peut donc pas lire les notes enregistrées. Tu peux écrire normalement : tout est gardé dans ce navigateur et remontera tout seul dès que tu l'ouvriras depuis Claude.",
+    bFail:c => "Impossible d'enregistrer dans le cloud" + c + ". Ce que tu as écrit est gardé dans ce navigateur et ne sera pas perdu — ouvre la page depuis Claude et ça remontera tout seul.",
+    bStale:c => "Impossible d'atteindre les notes enregistrées" + c + ". Ce qui s'affiche n'est peut-être pas la dernière version."
+  },
+  en: {
+    dir:"ltr",
+    brand:"Medicine Notebook", navIndex:"Contents", navOps:"My notes",
+    theme:"Switch theme",
+    eyebrow:"Faculté de médecine · Semestre 3",
+    t1:"Medicine", t2:"Notebook",
+    sub:n => "Six modules, " + n + " lessons. Every lesson has its own page: the notes, the status, and what is hard or easy in it.",
+    of:n => "/ " + n + " lessons done",
+    pct:p => p + "% of the semester", loading:"Loading your notes…",
+    done:"Done", doing:"Reading", left:"Left", last:"Last opened:",
+    qLabel:"Search a lesson, a prof or a module", qPh:"e.g. ECG, Pr. Akoudad, ictères…",
+    examLabel:"Exam date", cdPick:"Pick the date and the countdown starts.",
+    cdDays:n => "<b>" + n + "</b> days left", cdTom:"Tomorrow!", cdToday:"Today!",
+    cdPast:n => "<b>" + n + "</b> days ago",
+    noHit:"No lesson matches that.",
+    modules:"Modules", chapter:"CHAPTER",
+    foot:(t,p) => t + " lessons · " + p + " profs", pctShort:p => p + "%",
+    marked:"Bookmarked",
+    markedHint:"Nothing yet. Mark a lesson with ✦ and it shows up here.",
+    sLessons:n => n + " lessons", sProfs:n => n + " profs",
+    sDone:n => "Done " + n, sDoing:n => "Reading " + n, sLeft:n => "Left " + n,
+    modOp:"My take on this module",
+    modOpTip:"Heavy? Where to start? Which prof matters? — write here, it saves itself.",
+    modOpPh:"e.g. long module but well ordered, start with…",
+    status:["To do","Reading","Done"],
+    diff:["Easy","OK","Hard","Killer"],
+    cStatus:"Status", cDiff:"Difficulty", cMark:"Bookmark", markBtn:"✦ Come back",
+    notes:"My notes", write:"Write", read:"Read", notePh:"Write your notes here…",
+    noteEmpty:"Nothing written for this lesson yet. Switch to “Write” and start.",
+    syntax:'<code># heading</code> · <code>## subheading</code> · <code>### level 3</code> · ' +
+      '<code>- list</code> · <code>1. numbered</code> · <code>&gt; quote</code> · <code>! important</code> · ' +
+      '<code>**bold**</code> · <code>*italic*</code> · <code>==highlight==</code> · <code>---</code> divider',
+    saving:"Saving…", saved:"Saved ✓", savedLocal:"Kept on this device", saveFail:"Not saved ✕",
+    lesOp:"My take on this lesson", lHard:"What's hard here", lEasy:"What's easy here",
+    phHard:"the part that blocks me…", phEasy:"got this one straight away…",
+    opTip:"Everything is gathered on the “My notes” page.",
+    prev:"Previous", next:"Next",
+    opsEyebrow:"My remarks", opsTitle:"My notes on the courses",
+    opsSub:"Everything you wrote about the lessons, in one place — handy before the exam.",
+    opsHard:"Hard lessons", opsHardHint:"No lesson marked “Hard” or “Killer” yet.",
+    opsEasy:"Easy lessons", opsEasyHint:"No lesson marked “Easy” yet.",
+    opsSaid:"What's hard, what's easy",
+    opsSaidHint:"Write on a lesson what is hard and what is easy: it all gathers here.",
+    opsMods:"My take per module", opsModsHint:"Open a module and write your take: it shows up here.",
+    sHard:"Hard", sEasy:"Easy", openPage:"Open the page", openMod:"Open the module",
+    important:"Important", tMarked:"Bookmarked", tNote:"Has notes",
+    bNoStore:"This page is open outside Claude, so it cannot reach the notes saved in the cloud. Write anyway: everything is kept in this browser and goes up by itself the moment you open it from Claude.",
+    bFail:c => "Could not save to the cloud" + c + ". What you wrote is kept in this browser and will not be lost — open the page from Claude and it goes up by itself.",
+    bStale:c => "Could not reach the saved notes" + c + ". What you see may not be the latest version."
+  }
+};
+let LANG = "ar", T = I18N.ar, AB = "❯", AF = "❮";
+try { const v = localStorage.getItem("s3-lang"); if (I18N[v]) LANG = v; } catch(e){}
+
+function applyLang(){
+  T = I18N[LANG];
+  const rtl = T.dir === "rtl";
+  AB = rtl ? "❯" : "❮";          /* back: toward the start of the line */
+  AF = rtl ? "❮" : "❯";          /* forward: toward the end */
+  document.documentElement.setAttribute("dir", T.dir);
+  document.documentElement.setAttribute("lang", LANG);
+  paintChrome();
+}
+function paintChrome(){
+  document.getElementById("brand").innerHTML = esc(T.brand) + " <b>S3</b>";
+  document.getElementById("nav-fihris").textContent = T.navIndex;
+  document.getElementById("nav-aray").textContent = T.navOps;
+  const th = document.getElementById("theme");
+  th.title = T.theme; th.setAttribute("aria-label", T.theme);
+  document.querySelectorAll("#langs button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.l === LANG)));
+}
+document.getElementById("langs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-l]");
+  if (!b || b.dataset.l === LANG) return;
+  LANG = b.dataset.l;
+  try { localStorage.setItem("s3-lang", LANG); } catch(err){}
+  applyLang(); render();
+});
+
 /* ── model ───────────────────────────────────────────────── */
 const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+/* labels live in I18N.<lang>.status / .diff, keyed by k */
 const STATUS = [
-  {k:0,ar:"باقية",     tone:"var(--todo)"},
-  {k:1,ar:"كنقرا فيها", tone:"var(--doing)"},
-  {k:2,ar:"خلّصتها",   tone:"var(--done)"}
+  {k:0, tone:"var(--todo)"},
+  {k:1, tone:"var(--doing)"},
+  {k:2, tone:"var(--done)"}
 ];
 const DIFF = [
-  {k:1,ar:"ساهلة",cls:"d1",tag:"EASY",  tone:"var(--done)"},
-  {k:2,ar:"لاباس",cls:"d2",tag:"OK",    tone:"var(--doing)"},
-  {k:3,ar:"صعيبة",cls:"d3",tag:"HARD",  tone:"var(--rubric)"},
-  {k:4,ar:"قاتلة",cls:"d4",tag:"KILLER",tone:"var(--rubric)"}
+  {k:1,cls:"d1",tag:"EASY",  tone:"var(--done)"},
+  {k:2,cls:"d2",tag:"OK",    tone:"var(--doing)"},
+  {k:3,cls:"d3",tag:"HARD",  tone:"var(--rubric)"},
+  {k:4,cls:"d4",tag:"KILLER",tone:"var(--rubric)"}
 ];
 
 const MODULES = RAW.map((m, mi) => {
@@ -409,7 +629,8 @@ function typeset(src){
     if ((m = line.match(/^###\s+(.*)$/))){ flushPara(); flushList(); out.push("<h5>" + inlineFmt(m[1]) + "</h5>"); continue; }
     if ((m = line.match(/^##\s+(.*)$/))){ flushPara(); flushList(); out.push("<h4>" + inlineFmt(m[1]) + "</h4>"); continue; }
     if ((m = line.match(/^#\s+(.*)$/))){ flushPara(); flushList(); out.push("<h3>" + inlineFmt(m[1]) + "</h3>"); continue; }
-    if ((m = line.match(/^!\s*(.*)$/))){ flushPara(); flushList(); out.push('<div class="flag">' + inlineFmt(m[1]) + "</div>"); continue; }
+    if ((m = line.match(/^!\s*(.*)$/))){ flushPara(); flushList();
+      out.push('<div class="flag"><span class="flaglab">' + esc(T.important) + "</span>" + inlineFmt(m[1]) + "</div>"); continue; }
     if ((m = line.match(/^>\s?(.*)$/))){ flushPara(); flushList(); out.push("<blockquote>" + inlineFmt(m[1]) + "</blockquote>"); continue; }
     if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))){ flushPara(); openList("ol"); out.push("<li>" + inlineFmt(m[1]) + "</li>"); continue; }
     if ((m = line.match(/^\s*[-*•]\s+(.*)$/))){ flushPara(); openList("ul"); out.push("<li>" + inlineFmt(m[1]) + "</li>"); continue; }
@@ -449,11 +670,11 @@ function showSaving(on, done, msg){
   const el = document.getElementById("save");
   if (!el) return;
   const ok = !on && done && !msg;
-  el.textContent = on ? "كيتسجّل…" : (msg || (done ? "تسجّل ✓" : ""));
+  el.textContent = on ? T.saving : (msg || (done ? T.saved : ""));
   el.className = "save" + (ok ? " on" : "");
   if (ok){
     clearTimeout(saveTick);
-    saveTick = setTimeout(() => { if (el.isConnected && el.textContent === "تسجّل ✓") el.textContent = ""; }, 2600);
+    saveTick = setTimeout(() => { if (el.isConnected && el.textContent === T.saved) el.textContent = ""; }, 2600);
   }
 }
 function unchanged(path, body){
@@ -475,7 +696,7 @@ function patch(path, body){
 async function flush(path){
   const q = queue[path];
   if (!q || q.running || !q.dirty) return;
-  if (!db){ saveDraft(path); showSaving(false, false, "محفوظ فهاد الجهاز"); return; }
+  if (!db){ saveDraft(path); showSaving(false, false, T.savedLocal); return; }
   q.running = true;
   while (q.dirty){
     q.dirty = false;
@@ -483,9 +704,8 @@ async function flush(path){
     try { await db.doc(path).set(body); }
     catch (e){
       q.dirty = true; q.running = false; saveDraft(path);
-      showSaving(false, false, "ما تسجّلش ✕");
-      note("ما قدرتش نسجّل فالسحابة" + (e && e.code ? " (" + e.code + ")" : "") +
-        ". اللي كتبتي محفوظ فهاد النافيغاتور وما غاديش يضيع — حلّ الصفحة من داخل Claude وغادي يطلع وحدو.");
+      showSaving(false, false, T.saveFail);
+      note(T.bFail(e && e.code ? " (" + e.code + ")" : ""));
       return;
     }
   }
@@ -507,12 +727,12 @@ const view = document.getElementById("view");
 
 function statusDot(id){
   const v = st(id);
-  return '<span class="s' + v + '" title="' + STATUS[v].ar + '"><span class="dot"></span></span>';
+  return '<span class="s' + v + '" title="' + esc(T.status[v]) + '"><span class="dot"></span></span>';
 }
 function rowMarks(id){
   const d = diff(id), out = [];
-  if (marked(id)) out.push('<span class="star" title="محطوطة بالعلامة">✦</span>');
-  if (hasNote(id)) out.push('<span class="pen" title="فيها نوت">✎</span>');
+  if (marked(id)) out.push('<span class="star" title="' + esc(T.tMarked) + '">✦</span>');
+  if (hasNote(id)) out.push('<span class="pen" title="' + esc(T.tNote) + '">✎</span>');
   if (d) out.push('<span class="diffmark ' + DIFF[d-1].cls + '">' + DIFF[d-1].tag + "</span>");
   out.push(statusDot(id));
   return '<span class="marks">' + out.join("") + "</span>";
@@ -533,10 +753,10 @@ function renderIndex(){
   const pct = Math.round(done / ALL.length * 100);
 
   const exam = S.prefs.exam || "";
-  let cd = "حدّد النهار باش نحسبو ليك الباقي.";
+  let cd = T.cdPick;
   if (exam){
     const d = Math.ceil((new Date(exam + "T00:00:00") - new Date(new Date().toDateString())) / 86400000);
-    cd = d > 1 ? "باقي <b>" + d + "</b> نهار" : d === 1 ? "غدا!" : d === 0 ? "اليوم!" : "فات بـ <b>" + (-d) + "</b> نهار";
+    cd = d > 1 ? T.cdDays(d) : d === 1 ? T.cdTom : d === 0 ? T.cdToday : T.cdPast(-d);
   }
 
   const bookmarked = ALL.filter(l => marked(l.id));
@@ -544,48 +764,49 @@ function renderIndex(){
 
   view.innerHTML =
     '<section class="front">' +
-      '<div><p class="eyebrow">Faculté de médecine · Semestre 3</p>' +
-      '<h1>كراسة <span>الطب</span></h1>' +
-      '<p class="sub">ستّة موديولات، ' + ALL.length + ' درس. كل درس فيه الصفحة ديالو: النوت، الحالة، وشنو صعيب وشنو ساهل فيه.</p></div>' +
+      '<div><p class="eyebrow">' + esc(T.eyebrow) + "</p>" +
+      "<h1>" + esc(T.t1) + " <span>" + esc(T.t2) + "</span></h1>" +
+      '<p class="sub">' + esc(T.sub(ALL.length)) + "</p></div>" +
       '<div class="tally"><span class="big num">' + (S.loaded ? done : "—") + "</span>" +
-        '<span class="of">/ ' + ALL.length + " درس خلّصتهم</span>" +
+        '<span class="of">' + esc(T.of(ALL.length)) + "</span>" +
         '<div class="meter" style="--accent:var(--done)"><i style="width:' + (S.loaded ? pct : 0) + '%"></i></div>' +
-        '<p class="cap">' + (S.loaded ? pct + "٪ من السيميستر" : "كنقلّب على النوت…") + "</p></div>" +
+        '<p class="cap">' + esc(S.loaded ? T.pct(pct) : T.loading) + "</p></div>" +
     "</section>" +
 
     '<div class="legend">' +
-      '<span class="s2"><span class="dot"></span>خلّصت <b>' + nn(done) + "</b></span>" +
-      '<span class="s1"><span class="dot"></span>كنقرا <b>' + nn(doing) + "</b></span>" +
-      '<span class="s0"><span class="dot"></span>باقي <b>' + nn(left) + "</b></span>" +
-      (recent ? '<span>آخر درس فتحتو: <a href="#l-' + recent.id + '">' + lat(recent.title) + "</a></span>" : "") +
+      '<span class="s2"><span class="dot"></span>' + esc(T.done) + " <b>" + nn(done) + "</b></span>" +
+      '<span class="s1"><span class="dot"></span>' + esc(T.doing) + " <b>" + nn(doing) + "</b></span>" +
+      '<span class="s0"><span class="dot"></span>' + esc(T.left) + " <b>" + nn(left) + "</b></span>" +
+      (recent ? "<span>" + esc(T.last) + ' <a href="#l-' + recent.id + '">' + lat(recent.title) + "</a></span>" : "") +
     "</div>" +
 
     '<div class="strip">' +
-      '<div class="field"><label for="q">قلّب على درس، أستاذ، ولا موديول</label>' +
-        '<input type="search" id="q" placeholder="مثلا: ECG، Pr. Akoudad، ictères…" autocomplete="off"></div>' +
-      '<div class="field" style="flex:0 1 11rem"><label for="exam">نهار الامتحان</label>' +
+      '<div class="field"><label for="q">' + esc(T.qLabel) + "</label>" +
+        '<input type="search" id="q" placeholder="' + esc(T.qPh) + '" autocomplete="off"></div>' +
+      '<div class="field" style="flex:0 1 11rem"><label for="exam">' + esc(T.examLabel) + "</label>" +
         '<input type="date" id="exam" value="' + esc(exam) + '"></div>' +
       '<p class="countdown">' + cd + "</p>" +
     "</div>" +
     '<ul class="rows" id="qres" hidden></ul>' +
 
-    '<section class="block"><h2>الموديولات</h2><div class="shelf">' +
+    '<section class="block"><h2>' + esc(T.modules) + '</h2><div class="shelf">' +
       MODULES.map(m => {
         const s = modStats(m);
         return '<a class="chap" href="#' + m.id + '" style="--accent:' + m.accent + '">' +
-          '<span class="rn">' + m.roman + " · CHAPITRE</span>" +
+          '<span class="rn">' + m.roman + " · " + esc(T.chapter) + "</span>" +
           "<h3>" + lat(m.fr) + "</h3>" +
           '<p class="arname">' + esc(m.ar) + "</p>" +
           '<div class="meter" style="--accent:' + m.accent + '"><i style="width:' + s.pct + '%"></i></div>' +
-          '<div class="foot"><span>' + s.total + " دروس · " + m.profs.length + ' profs</span><span class="pct">' + s.pct + "٪</span></div>" +
+          '<div class="foot"><span>' + esc(T.foot(s.total, m.profs.length)) +
+          '</span><span class="pct">' + esc(T.pctShort(s.pct)) + "</span></div>" +
         "</a>";
       }).join("") +
     "</div></section>" +
 
-    '<section class="block"><h2>محطوطين بالعلامة</h2>' +
+    '<section class="block"><h2>' + esc(T.marked) + "</h2>" +
       (bookmarked.length
         ? '<ul class="rows">' + bookmarked.map(l => lessonRow(l, true)).join("") + "</ul>"
-        : '<p class="hint">حتى درس مازال. حيّد ✦ على شي درس بغيت ترجع ليه بسرعة وغادي يبان هنا.</p>') +
+        : '<p class="hint">' + esc(T.markedHint) + "</p>") +
     "</section>" +
     '<span class="ornament">❖ ❖ ❖</span>';
 
@@ -596,7 +817,7 @@ function renderIndex(){
     const hits = ALL.filter(l => fold(l.title + " " + l.prof + " " + l.mod.fr + " " + l.mod.ar + " " + (l.section||"")).includes(t)).slice(0, 24);
     res.hidden = false;
     res.innerHTML = hits.length ? hits.map(l => lessonRow(l, true)).join("")
-      : '<li><p class="hint">ما لقيت حتى درس بهاد الكلمة.</p></li>';
+      : '<li><p class="hint">' + esc(T.noHit) + "</p></li>";
   });
   document.getElementById("exam").addEventListener("change", e => { setPrefs({exam:e.target.value}); render(); });
 }
@@ -605,18 +826,18 @@ function renderModule(m){
   const s = modStats(m);
   const op = (S.modules[m.id] || {}).opinion || "";
   view.innerHTML =
-    '<p class="crumb"><a href="#fihris">الفهرس</a> ❯ <span>' + lat(m.fr) + "</span></p>" +
+    '<p class="crumb"><a href="#fihris">' + esc(T.navIndex) + "</a> " + AF + " <span>" + lat(m.fr) + "</span></p>" +
     '<header class="chead" style="--accent:' + m.accent + '">' +
-      '<p class="eyebrow">' + m.roman + " · CHAPITRE</p>" +
+      '<p class="eyebrow">' + m.roman + " · " + esc(T.chapter) + "</p>" +
       "<h1>" + lat(m.fr) + '</h1><p class="arname">' + esc(m.ar) + "</p>" +
       '<div class="meter" style="--accent:' + m.accent + '"><i style="width:' + s.pct + '%"></i></div>' +
-      '<div class="stats"><span>' + s.total + " دروس</span><span>" + m.profs.length + " أساتذة</span>" +
-      "<span>خلّصت " + s.done + "</span><span>كنقرا " + s.doing + "</span><span>باقي " + s.left + "</span></div>" +
+      '<div class="stats"><span>' + esc(T.sLessons(s.total)) + "</span><span>" + esc(T.sProfs(m.profs.length)) + "</span>" +
+      "<span>" + esc(T.sDone(s.done)) + "</span><span>" + esc(T.sDoing(s.doing)) + "</span><span>" + esc(T.sLeft(s.left)) + "</span></div>" +
     "</header>" +
     '<div class="card" style="max-width:46rem">' +
-      '<div class="cardhead"><h2>رأيي في المادة كاملة</h2><span class="save" id="save"></span></div>' +
-      '<p class="tip">واش ثقيلة؟ منين تبدا؟ أي أستاذ مهم؟ — كتب هنا وكيتسجّل وحدو.</p>' +
-      '<textarea class="minibox" id="op" style="min-height:6rem" placeholder="مثلا: الموديول طويل مي منظم، ابدا بـ…"></textarea></div>' +
+      '<div class="cardhead"><h2>' + esc(T.modOp) + '</h2><span class="save" id="save"></span></div>' +
+      '<p class="tip">' + esc(T.modOpTip) + "</p>" +
+      '<textarea class="minibox" id="op" style="min-height:6rem" placeholder="' + esc(T.modOpPh) + '"></textarea></div>' +
     MODULES[m.mi].sections.map(sec =>
       '<section class="part">' +
         (sec.label ? "<h2>" + lat(sec.label) + "</h2>" : "") +
@@ -641,7 +862,8 @@ function renderLesson(l){
   if (S.prefs.last !== l.id) setPrefs({last:l.id});
 
   view.innerHTML =
-    '<p class="crumb"><a href="#fihris">الفهرس</a> ❯ <a href="#' + m.id + '">' + lat(m.fr) + "</a></p>" +
+    '<p class="crumb"><a href="#fihris">' + esc(T.navIndex) + "</a> " + AF +
+      ' <a href="#' + m.id + '">' + lat(m.fr) + "</a></p>" +
     '<div class="leaf">' +
       "<div>" +
         '<header class="lhead" style="--accent:' + m.accent + '">' +
@@ -650,35 +872,35 @@ function renderLesson(l){
           '<p class="who">' + esc(l.prof) + "</p>" +
         "</header>" +
         '<div class="controls">' +
-          '<div class="ctl"><span>الحالة</span><div class="seg tone" id="segst" style="--tone:' + STATUS[cur].tone + '">' +
-            STATUS.map(x => '<button type="button" data-k="' + x.k + '" aria-pressed="' + (x.k === cur) + '">' + x.ar + "</button>").join("") +
+          '<div class="ctl"><span>' + esc(T.cStatus) + '</span><div class="seg tone" id="segst" style="--tone:' + STATUS[cur].tone + '">' +
+            STATUS.map(x => '<button type="button" data-k="' + x.k + '" aria-pressed="' + (x.k === cur) + '">' + esc(T.status[x.k]) + "</button>").join("") +
           "</div></div>" +
-          '<div class="ctl"><span>صعوبتها</span><div class="seg tone" id="segd" style="--tone:' + (cd ? DIFF[cd-1].tone : "var(--todo)") + '">' +
-            DIFF.map(x => '<button type="button" data-k="' + x.k + '" aria-pressed="' + (x.k === cd) + '">' + x.ar + "</button>").join("") +
+          '<div class="ctl"><span>' + esc(T.cDiff) + '</span><div class="seg tone" id="segd" style="--tone:' + (cd ? DIFF[cd-1].tone : "var(--todo)") + '">' +
+            DIFF.map(x => '<button type="button" data-k="' + x.k + '" aria-pressed="' + (x.k === cd) + '">' + esc(T.diff[x.k-1]) + "</button>").join("") +
           "</div></div>" +
-          '<div class="ctl"><span>علامة</span>' +
-            '<button class="markbtn" type="button" id="mark" aria-pressed="' + marked(l.id) + '">✦ رجع ليها</button></div>' +
+          '<div class="ctl"><span>' + esc(T.cMark) + "</span>" +
+            '<button class="markbtn" type="button" id="mark" aria-pressed="' + marked(l.id) + '">' + esc(T.markBtn) + "</button></div>" +
         "</div>" +
         '<section class="notewrap">' +
-          '<div class="notebar"><h2>النوت ديالي</h2><span class="save" id="save"></span>' +
+          '<div class="notebar"><h2>' + esc(T.notes) + '</h2><span class="save" id="save"></span>' +
             '<div class="seg" id="segmode">' +
-              '<button type="button" data-m="w" aria-pressed="true">كتب</button>' +
-              '<button type="button" data-m="r" aria-pressed="false">قراية</button>' +
+              '<button type="button" data-m="w" aria-pressed="true">' + esc(T.write) + "</button>" +
+              '<button type="button" data-m="r" aria-pressed="false">' + esc(T.read) + "</button>" +
             "</div></div>" +
           '<div class="notebody" id="notebody"></div>' +
         "</section>" +
         '<nav class="pager">' +
-          (prev ? '<a href="#l-' + prev.id + '"><span class="k">❯ اللي قبل</span><span class="v">' + lat(prev.title) + "</span></a>" : "<span></span>") +
-          (next ? '<a href="#l-' + next.id + '"><span class="k">اللي من بعد ❮</span><span class="v">' + lat(next.title) + "</span></a>" : "<span></span>") +
+          (prev ? '<a href="#l-' + prev.id + '"><span class="k">' + AB + " " + esc(T.prev) + '</span><span class="v">' + lat(prev.title) + "</span></a>" : "<span></span>") +
+          (next ? '<a href="#l-' + next.id + '"><span class="k">' + esc(T.next) + " " + AF + '</span><span class="v">' + lat(next.title) + "</span></a>" : "<span></span>") +
         "</nav>" +
       "</div>" +
       "<aside>" +
-        '<div class="card" style="border-top:2px solid ' + m.accent + '"><h2>رأيي في الدرس</h2>' +
-          '<p class="lab">شنو صعيب فيه</p>' +
-          '<textarea class="minibox" id="hard" placeholder="الجزء اللي كيعيّقني…"></textarea>' +
-          '<p class="lab">شنو ساهل فيه</p>' +
-          '<textarea class="minibox" id="easy" placeholder="هادشي فهمتو من اللول…"></textarea>' +
-          '<p class="tip">كلشي كيبان مجموع فصفحة «الآراء».</p></div>' +
+        '<div class="card" style="border-top:2px solid ' + m.accent + '"><h2>' + esc(T.lesOp) + "</h2>" +
+          '<p class="lab">' + esc(T.lHard) + "</p>" +
+          '<textarea class="minibox" id="hard" placeholder="' + esc(T.phHard) + '"></textarea>' +
+          '<p class="lab">' + esc(T.lEasy) + "</p>" +
+          '<textarea class="minibox" id="easy" placeholder="' + esc(T.phEasy) + '"></textarea>' +
+          '<p class="tip">' + esc(T.opTip) + "</p></div>" +
       "</aside>" +
     "</div>";
 
@@ -686,17 +908,15 @@ function renderLesson(l){
   let mode = "w";
   function paintNote(){
     if (mode === "w"){
-      body.innerHTML = '<textarea id="note-' + l.id + '" placeholder="كتب النوت ديالك هنا…"></textarea>' +
-        '<p class="syntax"><code># عنوان</code> · <code>## عنوان صغير</code> · <code>### فرع</code> · ' +
-        '<code>- لائحة</code> · <code>1. مرتّبة</code> · <code>&gt; اقتباس</code> · <code>! مهم</code> · ' +
-        '<code>**غليظ**</code> · <code>*مايل*</code> · <code>==معلّم==</code> · <code>---</code> فاصل</p>';
+      body.innerHTML = '<textarea id="note-' + l.id + '" placeholder="' + esc(T.notePh) + '"></textarea>' +
+        '<p class="syntax">' + T.syntax + "</p>";
       const ta = body.firstChild;
       ta.value = (les(l.id).note || "");
       ta.addEventListener("input", () => setLesson(l.id, {note:ta.value}));
     } else {
       const src = (les(l.id).note || "").trim();
       body.innerHTML = src ? '<div class="typeset">' + typeset(src) + "</div>"
-        : '<p class="empty">مازال ما كتبتي حتى نوتة فهاد الدرس. دوز لـ«كتب» وبدا.</p>';
+        : '<p class="empty">' + esc(T.noteEmpty) + "</p>";
     }
   }
   paintNote();
@@ -737,34 +957,34 @@ function renderAray(){
   const ops = MODULES.filter(m => ((S.modules[m.id]||{}).opinion||"").trim());
 
   view.innerHTML =
-    '<p class="crumb"><a href="#fihris">الفهرس</a> ❯ <span>الآراء</span></p>' +
-    '<header class="chead" style="--accent:var(--rubric)"><p class="eyebrow">Mes remarques</p>' +
-      "<h1>الآراء ديالي</h1>" +
-      '<p class="arname">كلشي اللي كتبتي على الدروس مجموع فبلاصة واحدة — مزيان قبل الامتحان.</p></header>' +
+    '<p class="crumb"><a href="#fihris">' + esc(T.navIndex) + "</a> " + AF + " <span>" + esc(T.navOps) + "</span></p>" +
+    '<header class="chead" style="--accent:var(--rubric)"><p class="eyebrow">' + esc(T.opsEyebrow) + "</p>" +
+      "<h1>" + esc(T.opsTitle) + "</h1>" +
+      '<p class="arname">' + esc(T.opsSub) + "</p></header>" +
 
-    '<section class="block"><h2>دروس صعيبة</h2>' +
+    '<section class="block"><h2>' + esc(T.opsHard) + "</h2>" +
       (hard.length ? '<ul class="rows">' + hard.map(l => lessonRow(l, true)).join("") + "</ul>"
-        : '<p class="hint">مازال ما علّمتي حتى درس بـ«صعيبة» ولا «قاتلة».</p>') + "</section>" +
+        : '<p class="hint">' + esc(T.opsHardHint) + "</p>") + "</section>" +
 
-    '<section class="block"><h2>دروس ساهلة</h2>' +
+    '<section class="block"><h2>' + esc(T.opsEasy) + "</h2>" +
       (easy.length ? '<ul class="rows">' + easy.map(l => lessonRow(l, true)).join("") + "</ul>"
-        : '<p class="hint">مازال ما علّمتي حتى درس بـ«ساهلة».</p>') + "</section>" +
+        : '<p class="hint">' + esc(T.opsEasyHint) + "</p>") + "</section>" +
 
-    '<section class="block"><h2>شنو صعيب وشنو ساهل</h2>' +
+    '<section class="block"><h2>' + esc(T.opsSaid) + "</h2>" +
       (said.length ? '<div class="grid2">' + said.map(l =>
         '<article class="op" style="--accent:' + l.mod.accent + '"><h3>' + lat(l.title) + "</h3>" +
         '<p class="arname">' + esc(l.mod.fr) + " · " + esc(l.prof) + "</p>" +
-        ((les(l.id).hard||"").trim() ? '<p class="lab-hard">صعيب</p><p class="quote">' + esc(les(l.id).hard.trim()) + "</p>" : "") +
-        ((les(l.id).easy||"").trim() ? '<p class="lab-easy">ساهل</p><p class="quote">' + esc(les(l.id).easy.trim()) + "</p>" : "") +
-        '<p style="margin:.9rem 0 0"><a class="srclink" href="#l-' + l.id + '">افتح الصفحة ❮</a></p></article>').join("") + "</div>"
-        : '<p class="hint">كتب فشي درس شنو صعيب فيه وشنو ساهل، وغادي يتجمع هنا.</p>') + "</section>" +
+        ((les(l.id).hard||"").trim() ? '<p class="lab-hard">' + esc(T.sHard) + '</p><p class="quote">' + esc(les(l.id).hard.trim()) + "</p>" : "") +
+        ((les(l.id).easy||"").trim() ? '<p class="lab-easy">' + esc(T.sEasy) + '</p><p class="quote">' + esc(les(l.id).easy.trim()) + "</p>" : "") +
+        '<p style="margin:.9rem 0 0"><a class="srclink" href="#l-' + l.id + '">' + esc(T.openPage) + " " + AF + "</a></p></article>").join("") + "</div>"
+        : '<p class="hint">' + esc(T.opsSaidHint) + "</p>") + "</section>" +
 
-    '<section class="block"><h2>رأيي في كل مادة</h2>' +
+    '<section class="block"><h2>' + esc(T.opsMods) + "</h2>" +
       (ops.length ? '<div class="grid2">' + ops.map(m =>
         '<article class="op" style="--accent:' + m.accent + '"><h3>' + lat(m.fr) + "</h3>" +
         '<p class="arname">' + esc(m.ar) + '</p><p class="txt">' + esc(S.modules[m.id].opinion.trim()) + "</p>" +
-        '<p style="margin:.9rem 0 0"><a class="srclink" href="#' + m.id + '">افتح الموديول ❮</a></p></article>').join("") + "</div>"
-        : '<p class="hint">دخل لشي موديول وكتب رأيك فيه، وغادي يبان هنا.</p>') + "</section>" +
+        '<p style="margin:.9rem 0 0"><a class="srclink" href="#' + m.id + '">' + esc(T.openMod) + " " + AF + "</a></p></article>").join("") + "</div>"
+        : '<p class="hint">' + esc(T.opsModsHint) + "</p>") + "</section>" +
     '<span class="ornament">❖ ❖ ❖</span>';
 }
 
@@ -822,6 +1042,7 @@ addEventListener("keydown", e => {
   }
 });
 
+applyLang();
 loadDrafts();
 render();
 
@@ -833,14 +1054,14 @@ async function useCap(name){
   db = await useCap("db");
   if (!db){
     S.loaded = true;
-    note("هاد الصفحة محلولة برّا Claude، ولهذا ما كتوصلش للنوت المحفوظين فالسحابة. تقدر تكتب عادي — كلشي كيتسجل فهاد النافيغاتور وغادي يطلع للسحابة بوحدو ملي تحلّها من داخل Claude.");
+    note(T.bNoStore);
     safeRender(); return;
   }
   flushAll();   /* push anything written while the store was out of reach */
 
   const timer = setTimeout(() => {
     stale = true;
-    note("ما قدرتش نوصل للنوت المحفوظين. اللي كتشوف دابا يمكن ماشي آخر نسخة.");
+    note(T.bStale(""));
     safeRender();
   }, 10000);
   const settle = () => { clearTimeout(timer); stale = false; S.loaded = true;
@@ -856,8 +1077,7 @@ async function useCap(name){
     if (!snap.metadata.fromCache) settle(); else safeRender();
   }, e => {
     stale = true; S.loaded = true;
-    note("ما قدرتش نوصل للنوت المحفوظين" + (e && e.code ? " (" + e.code + ")" : "") +
-      ". اللي كتكتب دابا محفوظ فهاد النافيغاتور.");
+    note(T.bStale(e && e.code ? " (" + e.code + ")" : ""));
     safeRender();
   });
 
