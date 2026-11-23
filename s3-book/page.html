@@ -252,9 +252,35 @@ textarea{width:100%;min-height:22rem;resize:vertical;background:transparent;bord
   background-attachment:local}
 textarea:focus{outline:none}
 textarea::placeholder{color:var(--ink-faint)}
-.syntax{font-family:var(--mono);font-size:.67rem;color:var(--ink-faint);line-height:1.9;
-  margin:1rem 0 0;padding-top:.7rem;border-top:1px dotted var(--rule)}
+.syndet{margin:1.1rem 0 0;padding-top:.7rem;border-top:1px dotted var(--rule)}
+.syndet summary{font-family:var(--naskh);font-size:.78rem;color:var(--ink-faint);cursor:pointer}
+.syndet summary:hover{color:var(--ink-soft)}
+.syntax{font-family:var(--mono);font-size:.67rem;color:var(--ink-faint);line-height:1.95;margin:.6rem 0 0}
 .syntax code{background:var(--leaf-2);padding:.05rem .3rem;border-radius:2px;color:var(--ink-soft)}
+
+/* writing toolbar */
+.tools{display:flex;flex-direction:column;gap:.42rem;margin:0 0 1.1rem;
+  padding-bottom:.9rem;border-bottom:1px dotted var(--rule)}
+.trow{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.tools button{appearance:none;background:var(--leaf-2);border:1px solid var(--rule);border-radius:2px;
+  color:var(--ink-soft);font-family:var(--naskh);font-size:.78rem;line-height:1;
+  padding:.42rem .58rem;min-height:31px;cursor:pointer;transition:border-color .15s,color .15s}
+.tools button:hover{color:var(--ink);border-color:var(--ink-faint)}
+.tools .ico{font-family:var(--serif);font-size:.95rem;min-width:2.1rem}
+.tools .ico mark{padding:0 .15em}
+.tools .ico code{font-family:var(--mono);font-size:.7rem;background:none}
+.tools .calb{color:var(--tone);border-color:color-mix(in srgb,var(--tone) 45%,transparent);
+  background:color-mix(in srgb,var(--tone) 9%,transparent)}
+.tools .calb:hover{color:var(--tone);border-color:var(--tone)}
+.tools .calb i{font-style:normal;margin-inline-end:.3em}
+.tools .sw{width:1.75rem;min-width:1.75rem;height:1.75rem;min-height:1.75rem;padding:0;border-radius:50%;
+  background:var(--tone);border:1px solid color-mix(in srgb,var(--ink) 22%,transparent)}
+.tools .sym{font-family:var(--serif);font-size:1rem;min-width:2.2rem;padding:.3rem .32rem}
+.tlab{font-family:var(--naskh);font-size:.72rem;color:var(--ink-faint);margin-inline-end:.25rem}
+.symdet summary{font-family:var(--naskh);font-size:.72rem;color:var(--ink-faint);cursor:pointer;padding:.1rem 0}
+.symdet summary:hover{color:var(--ink-soft)}
+.symdet .trow{margin-top:.4rem}
+@media (max-width:560px){.tools button{min-height:36px}.tools .sw{width:2rem;min-width:2rem;height:2rem;min-height:2rem}}
 
 /* typeset note */
 .typeset{font-family:var(--naskh);font-size:1.03rem;line-height:1.95;max-width:62ch}
@@ -278,10 +304,26 @@ textarea::placeholder{color:var(--ink-faint)}
   font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
 .typeset blockquote{margin:1.3em 0;padding:.1em 1em;border-inline-start:2px solid var(--rubric);
   font-style:italic;color:var(--ink-soft)}
-.typeset .flag{margin:1.3em 0;padding:.75em 1em;background:color-mix(in srgb,var(--rubric) 7%,transparent);
-  border:1px solid color-mix(in srgb,var(--rubric) 28%,transparent);border-radius:2px}
-.typeset .flaglab{display:block;font-family:var(--naskh);font-size:.8rem;
-  font-weight:700;color:var(--rubric);margin-bottom:.15em}
+.typeset .cal{margin:1.3em 0;padding:.75em 1em;border-radius:2px;
+  background:color-mix(in srgb,var(--tone) 7%,transparent);
+  border:1px solid color-mix(in srgb,var(--tone) 30%,transparent)}
+.typeset .cal .lab{display:block;font-family:var(--naskh);font-size:.82rem;
+  font-weight:700;color:var(--tone);margin-bottom:.15em}
+.typeset .cal .lab i{font-style:normal;margin-inline-end:.35em}
+.typeset .cal .calbody{display:block}
+.typeset .ci{--tone:var(--rubric)}
+.typeset .cw{--tone:var(--doing)}
+.typeset .cf{--tone:var(--rubric);border-inline-start-width:3px}
+.typeset .cf .lab{display:inline-block;background:var(--tone);color:var(--paper);
+  padding:.08em .6em;border-radius:2px;margin-bottom:.4em}
+.typeset .ct{--tone:var(--done)}
+.typeset .cd{--tone:var(--indigo)}
+.typeset .c-r{color:var(--rubric)}
+.typeset .c-o{color:var(--doing)}
+.typeset .c-g{color:var(--done)}
+.typeset .c-b{color:var(--indigo)}
+.typeset .c-p{color:var(--c6)}
+.typeset .c-n{color:var(--ink-faint)}
 .typeset mark{background:color-mix(in srgb,var(--doing) 26%,transparent);color:inherit;padding:0 .12em}
 .typeset code{font-family:var(--mono);font-size:.86em;background:var(--leaf-2);padding:.08em .32em;border-radius:2px}
 .typeset strong{font-weight:700}
@@ -395,9 +437,17 @@ const I18N = {
     cStatus:"الحالة", cDiff:"صعوبتها", cMark:"علامة", markBtn:"✦ رجع ليها",
     notes:"النوت ديالي", write:"كتب", read:"قراية", notePh:"كتب النوت ديالك هنا…",
     noteEmpty:"مازال ما كتبتي حتى نوتة فهاد الدرس. دوز لـ«كتب» وبدا.",
+    synTitle:"السانطاكس ديال النوت",
     syntax:'<code># عنوان</code> · <code>## عنوان صغير</code> · <code>### فرع</code> · ' +
-      '<code>- لائحة</code> · <code>1. مرتّبة</code> · <code>&gt; اقتباس</code> · <code>! مهم</code> · ' +
-      '<code>**غليظ**</code> · <code>*مايل*</code> · <code>==معلّم==</code> · <code>---</code> فاصل',
+      '<code>- لائحة</code> · <code>1. مرتّبة</code> · <code>&gt; اقتباس</code> · <code>---</code> فاصل · ' +
+      '<code>! مهم</code> · <code>!? عندك بالك</code> · <code>!! ممنوع</code> · <code>!+ نصيحة</code> · <code>!= تعريف</code> · ' +
+      '<code>**غليظ**</code> · <code>*مايل*</code> · <code>==معلّم==</code> · <code>`كود`</code> · ' +
+      '<code>{r:بالحمر}</code> (r o g b p n)',
+    tbTitle:"عنوان", tbSub:"عنوان صغير", tbSub2:"فرع", tbList:"لائحة", tbNum:"مرتّبة",
+    tbQuote:"اقتباس", tbRule:"فاصل", tbBold:"غليظ", tbItal:"مايل", tbMark:"معلّم", tbCode:"كود",
+    tbModes:"خانات", tbColors:"ألوان", tbSymbols:"رموز",
+    cal:{imp:"مهم", warn:"عندك بالك", forbid:"ممنوع", tip:"نصيحة", def:"تعريف"},
+    col:{r:"حمر", o:"عسلي", g:"خضر", b:"زرق", p:"بنفسجي", n:"رمادي"},
     saving:"كيتسجّل…", saved:"تسجّل ✓", savedLocal:"محفوظ فهاد الجهاز", saveFail:"ما تسجّلش ✕",
     lesOp:"رأيي في الدرس", lHard:"شنو صعيب فيه", lEasy:"شنو ساهل فيه",
     phHard:"الجزء اللي كيعيّقني…", phEasy:"هادشي فهمتو من اللول…",
@@ -411,7 +461,7 @@ const I18N = {
     opsSaidHint:"كتب فشي درس شنو صعيب فيه وشنو ساهل، وغادي يتجمع هنا.",
     opsMods:"رأيي في كل مادة", opsModsHint:"دخل لشي موديول وكتب رأيك فيه، وغادي يبان هنا.",
     sHard:"صعيب", sEasy:"ساهل", openPage:"افتح الصفحة", openMod:"افتح الموديول",
-    important:"مهم", tMarked:"محطوطة بالعلامة", tNote:"فيها نوت",
+    tMarked:"محطوطة بالعلامة", tNote:"فيها نوت",
     bNoStore:"هاد الصفحة محلولة برّا Claude، ولهذا ما كتوصلش للنوت المحفوظين فالسحابة. تقدر تكتب عادي — كلشي كيتسجل فهاد النافيغاتور وغادي يطلع للسحابة بوحدو ملي تحلّها من داخل Claude.",
     bFail:c => "ما قدرتش نسجّل فالسحابة" + c + ". اللي كتبتي محفوظ فهاد النافيغاتور وما غاديش يضيع — حلّ الصفحة من داخل Claude وغادي يطلع وحدو.",
     bStale:c => "ما قدرتش نوصل للنوت المحفوظين" + c + ". اللي كتشوف دابا يمكن ماشي آخر نسخة."
@@ -445,9 +495,17 @@ const I18N = {
     cStatus:"État", cDiff:"Difficulté", cMark:"Repère", markBtn:"✦ À revoir",
     notes:"Mes notes", write:"Écrire", read:"Lire", notePh:"Écris tes notes ici…",
     noteEmpty:"Rien d'écrit pour ce cours. Passe à « Écrire » pour commencer.",
+    synTitle:"La syntaxe des notes",
     syntax:'<code># titre</code> · <code>## sous-titre</code> · <code>### niveau 3</code> · ' +
-      '<code>- liste</code> · <code>1. numérotée</code> · <code>&gt; citation</code> · <code>! important</code> · ' +
-      '<code>**gras**</code> · <code>*italique*</code> · <code>==surligné==</code> · <code>---</code> séparateur',
+      '<code>- liste</code> · <code>1. numérotée</code> · <code>&gt; citation</code> · <code>---</code> séparateur · ' +
+      '<code>! important</code> · <code>!? attention</code> · <code>!! interdit</code> · <code>!+ astuce</code> · <code>!= définition</code> · ' +
+      '<code>**gras**</code> · <code>*italique*</code> · <code>==surligné==</code> · <code>`code`</code> · ' +
+      '<code>{r:en rouge}</code> (r o g b p n)',
+    tbTitle:"Titre", tbSub:"Sous-titre", tbSub2:"Niveau 3", tbList:"Liste", tbNum:"Numérotée",
+    tbQuote:"Citation", tbRule:"Séparateur", tbBold:"Gras", tbItal:"Italique", tbMark:"Surligné", tbCode:"Code",
+    tbModes:"Encadrés", tbColors:"Couleurs", tbSymbols:"Symboles",
+    cal:{imp:"Important", warn:"Attention", forbid:"Interdit", tip:"Astuce", def:"Définition"},
+    col:{r:"rouge", o:"ocre", g:"vert", b:"bleu", p:"prune", n:"gris"},
     saving:"Enregistrement…", saved:"Enregistré ✓", savedLocal:"Gardé sur cet appareil", saveFail:"Non enregistré ✕",
     lesOp:"Mon avis sur ce cours", lHard:"Ce qui est dur", lEasy:"Ce qui est facile",
     phHard:"la partie qui me bloque…", phEasy:"compris du premier coup…",
@@ -461,7 +519,7 @@ const I18N = {
     opsSaidHint:"Note sur un cours ce qui est dur et ce qui est facile : tout se rassemble ici.",
     opsMods:"Mon avis par module", opsModsHint:"Ouvre un module et écris ton avis : il apparaîtra ici.",
     sHard:"Dur", sEasy:"Facile", openPage:"Ouvrir la page", openMod:"Ouvrir le module",
-    important:"Important", tMarked:"Mis de côté", tNote:"Contient des notes",
+    tMarked:"Mis de côté", tNote:"Contient des notes",
     bNoStore:"Cette page est ouverte hors de Claude, elle ne peut donc pas lire les notes enregistrées. Tu peux écrire normalement : tout est gardé dans ce navigateur et remontera tout seul dès que tu l'ouvriras depuis Claude.",
     bFail:c => "Impossible d'enregistrer dans le cloud" + c + ". Ce que tu as écrit est gardé dans ce navigateur et ne sera pas perdu — ouvre la page depuis Claude et ça remontera tout seul.",
     bStale:c => "Impossible d'atteindre les notes enregistrées" + c + ". Ce qui s'affiche n'est peut-être pas la dernière version."
@@ -495,9 +553,17 @@ const I18N = {
     cStatus:"Status", cDiff:"Difficulty", cMark:"Bookmark", markBtn:"✦ Come back",
     notes:"My notes", write:"Write", read:"Read", notePh:"Write your notes here…",
     noteEmpty:"Nothing written for this lesson yet. Switch to “Write” and start.",
+    synTitle:"The note syntax",
     syntax:'<code># heading</code> · <code>## subheading</code> · <code>### level 3</code> · ' +
-      '<code>- list</code> · <code>1. numbered</code> · <code>&gt; quote</code> · <code>! important</code> · ' +
-      '<code>**bold**</code> · <code>*italic*</code> · <code>==highlight==</code> · <code>---</code> divider',
+      '<code>- list</code> · <code>1. numbered</code> · <code>&gt; quote</code> · <code>---</code> divider · ' +
+      '<code>! important</code> · <code>!? watch out</code> · <code>!! never</code> · <code>!+ tip</code> · <code>!= definition</code> · ' +
+      '<code>**bold**</code> · <code>*italic*</code> · <code>==highlight==</code> · <code>`code`</code> · ' +
+      '<code>{r:in red}</code> (r o g b p n)',
+    tbTitle:"Heading", tbSub:"Subheading", tbSub2:"Level 3", tbList:"List", tbNum:"Numbered",
+    tbQuote:"Quote", tbRule:"Divider", tbBold:"Bold", tbItal:"Italic", tbMark:"Highlight", tbCode:"Code",
+    tbModes:"Callouts", tbColors:"Colours", tbSymbols:"Symbols",
+    cal:{imp:"Important", warn:"Watch out", forbid:"Never", tip:"Tip", def:"Definition"},
+    col:{r:"red", o:"ochre", g:"green", b:"blue", p:"plum", n:"grey"},
     saving:"Saving…", saved:"Saved ✓", savedLocal:"Kept on this device", saveFail:"Not saved ✕",
     lesOp:"My take on this lesson", lHard:"What's hard here", lEasy:"What's easy here",
     phHard:"the part that blocks me…", phEasy:"got this one straight away…",
@@ -511,7 +577,7 @@ const I18N = {
     opsSaidHint:"Write on a lesson what is hard and what is easy: it all gathers here.",
     opsMods:"My take per module", opsModsHint:"Open a module and write your take: it shows up here.",
     sHard:"Hard", sEasy:"Easy", openPage:"Open the page", openMod:"Open the module",
-    important:"Important", tMarked:"Bookmarked", tNote:"Has notes",
+    tMarked:"Bookmarked", tNote:"Has notes",
     bNoStore:"This page is open outside Claude, so it cannot reach the notes saved in the cloud. Write anyway: everything is kept in this browser and goes up by itself the moment you open it from Claude.",
     bFail:c => "Could not save to the cloud" + c + ". What you wrote is kept in this browser and will not be lost — open the page from Claude and it goes up by itself.",
     bStale:c => "Could not reach the saved notes" + c + ". What you see may not be the latest version."
@@ -612,19 +678,38 @@ const fold = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(
 const lat = s => '<span class="lat" dir="ltr">' + esc(s) + "</span>";
 
 /* ── book-set notes ──────────────────────────────────────── */
+/* callouts: a line opening with one of these tokens becomes a boxed note */
+const CAL = [
+  {k:"warn",   tok:"!?", cls:"cw", glyph:"⚠", tone:"var(--doing)"},
+  {k:"forbid", tok:"!!", cls:"cf", glyph:"⊘", tone:"var(--rubric)"},
+  {k:"tip",    tok:"!+", cls:"ct", glyph:"✚", tone:"var(--done)"},
+  {k:"def",    tok:"!=", cls:"cd", glyph:"≡", tone:"var(--indigo)"},
+  {k:"imp",    tok:"!",  cls:"ci", glyph:"⁕", tone:"var(--rubric)"}
+];
+const CAL_RE = /^(!\?|!!|!\+|!=|!)\s*(.*)$/;
+const COLORS = [
+  {k:"r", tone:"var(--rubric)"}, {k:"o", tone:"var(--doing)"}, {k:"g", tone:"var(--done)"},
+  {k:"b", tone:"var(--indigo)"}, {k:"p", tone:"var(--c6)"},    {k:"n", tone:"var(--ink-faint)"}
+];
+const CAL_SHOW = ["imp","warn","forbid","tip","def"].map(k => CAL.find(c => c.k === k));
+const SYMBOLS = ["⊘","⚠","★","✓","✗","→","⇒","↑","↓","±","≈","°","µ","♥","⚕","№","⊕","⊖"];
+
 function inlineFmt(s){
   return esc(s)
     .replace(/`([^`\n]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
-    .replace(/==([^=\n]+)==/g, "<mark>$1</mark>");
+    .replace(/==([^=\n]+)==/g, "<mark>$1</mark>")
+    .replace(/\{([rogbpn]):([^{}\n]*)\}/g, '<span class="c-$1">$2</span>');
 }
 function typeset(src){
   const lines = String(src || "").replace(/\r/g,"").split("\n");
+  /* dir="auto" per block: a French line reads left-to-right and an Arabic one
+     right-to-left inside the same note, with punctuation where it belongs */
   const out = []; let para = [], list = null, firstPara = true;
   const flushPara = () => {
     if (!para.length) return;
-    out.push('<p' + (firstPara ? ' class="lede"' : '') + ">" + inlineFmt(para.join("\n")).replace(/\n/g,"<br>") + "</p>");
+    out.push('<p dir="auto"' + (firstPara ? ' class="lede"' : '') + ">" + inlineFmt(para.join("\n")).replace(/\n/g,"<br>") + "</p>");
     firstPara = false; para = [];
   };
   const flushList = () => { if (list){ out.push("</" + list + ">"); list = null; } };
@@ -634,14 +719,19 @@ function typeset(src){
     if (!line.trim()){ flushPara(); flushList(); continue; }
     let m;
     if (/^---+$/.test(line.trim())){ flushPara(); flushList(); out.push("<hr>"); continue; }
-    if ((m = line.match(/^###\s+(.*)$/))){ flushPara(); flushList(); out.push("<h5>" + inlineFmt(m[1]) + "</h5>"); continue; }
-    if ((m = line.match(/^##\s+(.*)$/))){ flushPara(); flushList(); out.push("<h4>" + inlineFmt(m[1]) + "</h4>"); continue; }
-    if ((m = line.match(/^#\s+(.*)$/))){ flushPara(); flushList(); out.push("<h3>" + inlineFmt(m[1]) + "</h3>"); continue; }
-    if ((m = line.match(/^!\s*(.*)$/))){ flushPara(); flushList();
-      out.push('<div class="flag"><span class="flaglab">' + esc(T.important) + "</span>" + inlineFmt(m[1]) + "</div>"); continue; }
-    if ((m = line.match(/^>\s?(.*)$/))){ flushPara(); flushList(); out.push("<blockquote>" + inlineFmt(m[1]) + "</blockquote>"); continue; }
-    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))){ flushPara(); openList("ol"); out.push("<li>" + inlineFmt(m[1]) + "</li>"); continue; }
-    if ((m = line.match(/^\s*[-*•]\s+(.*)$/))){ flushPara(); openList("ul"); out.push("<li>" + inlineFmt(m[1]) + "</li>"); continue; }
+    if ((m = line.match(/^###\s+(.*)$/))){ flushPara(); flushList(); out.push('<h5 dir="auto">' + inlineFmt(m[1]) + "</h5>"); continue; }
+    if ((m = line.match(/^##\s+(.*)$/))){ flushPara(); flushList(); out.push('<h4 dir="auto">' + inlineFmt(m[1]) + "</h4>"); continue; }
+    if ((m = line.match(/^#\s+(.*)$/))){ flushPara(); flushList(); out.push('<h3 dir="auto">' + inlineFmt(m[1]) + "</h3>"); continue; }
+    if ((m = line.match(CAL_RE))){
+      const c = CAL.find(x => x.tok === m[1]);
+      flushPara(); flushList();
+      out.push('<div class="cal ' + c.cls + '"><span class="lab"><i>' + c.glyph + "</i>" +
+        esc(T.cal[c.k]) + '</span><span class="calbody" dir="auto">' + inlineFmt(m[2]) + "</span></div>");
+      continue;
+    }
+    if ((m = line.match(/^>\s?(.*)$/))){ flushPara(); flushList(); out.push('<blockquote dir="auto">' + inlineFmt(m[1]) + "</blockquote>"); continue; }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))){ flushPara(); openList("ol"); out.push('<li dir="auto">' + inlineFmt(m[1]) + "</li>"); continue; }
+    if ((m = line.match(/^\s*[-*•]\s+(.*)$/))){ flushPara(); openList("ul"); out.push('<li dir="auto">' + inlineFmt(m[1]) + "</li>"); continue; }
     flushList(); para.push(line);
   }
   flushPara(); flushList();
@@ -732,6 +822,9 @@ const setPrefs  = body => patch("meta/prefs", body);
 
 /* ── views ───────────────────────────────────────────────── */
 const view = document.getElementById("view");
+/* write/read stays put across re-renders of the same lesson, and resets
+   to write when another lesson is opened */
+let noteMode = "w", noteModeFor = null;
 
 function statusDot(id){
   const v = st(id);
@@ -845,7 +938,7 @@ function renderModule(m){
     '<div class="card" style="max-width:46rem">' +
       '<div class="cardhead"><h2>' + esc(T.modOp) + '</h2><span class="save" id="save"></span></div>' +
       '<p class="tip">' + esc(T.modOpTip) + "</p>" +
-      '<textarea class="minibox" id="op" style="min-height:6rem" placeholder="' + esc(T.modOpPh) + '"></textarea></div>' +
+      '<textarea class="minibox" id="op" dir="auto" style="min-height:6rem" placeholder="' + esc(T.modOpPh) + '"></textarea></div>' +
     MODULES[m.mi].sections.map(sec =>
       '<section class="part">' +
         (sec.label ? "<h2>" + lat(sec.label) + "</h2>" : "") +
@@ -867,6 +960,7 @@ function renderLesson(l){
   const idx = m.lessons.indexOf(l);
   const prev = m.lessons[idx-1], next = m.lessons[idx+1];
   const cur = st(l.id), cd = diff(l.id);
+  if (noteModeFor !== l.id){ noteMode = "w"; noteModeFor = l.id; }
   if (S.prefs.last !== l.id) setPrefs({last:l.id});
 
   view.innerHTML =
@@ -892,8 +986,8 @@ function renderLesson(l){
         '<section class="notewrap">' +
           '<div class="notebar"><h2>' + esc(T.notes) + '</h2><span class="save" id="save"></span>' +
             '<div class="seg" id="segmode">' +
-              '<button type="button" data-m="w" aria-pressed="true">' + esc(T.write) + "</button>" +
-              '<button type="button" data-m="r" aria-pressed="false">' + esc(T.read) + "</button>" +
+              '<button type="button" data-m="w" aria-pressed="' + (noteMode === "w") + '">' + esc(T.write) + "</button>" +
+              '<button type="button" data-m="r" aria-pressed="' + (noteMode === "r") + '">' + esc(T.read) + "</button>" +
             "</div></div>" +
           '<div class="notebody" id="notebody"></div>' +
         "</section>" +
@@ -905,22 +999,93 @@ function renderLesson(l){
       "<aside>" +
         '<div class="card" style="border-top:2px solid ' + m.accent + '"><h2>' + esc(T.lesOp) + "</h2>" +
           '<p class="lab">' + esc(T.lHard) + "</p>" +
-          '<textarea class="minibox" id="hard" placeholder="' + esc(T.phHard) + '"></textarea>' +
+          '<textarea class="minibox" id="hard" dir="auto" placeholder="' + esc(T.phHard) + '"></textarea>' +
           '<p class="lab">' + esc(T.lEasy) + "</p>" +
-          '<textarea class="minibox" id="easy" placeholder="' + esc(T.phEasy) + '"></textarea>' +
+          '<textarea class="minibox" id="easy" dir="auto" placeholder="' + esc(T.phEasy) + '"></textarea>' +
           '<p class="tip">' + esc(T.opTip) + "</p></div>" +
       "</aside>" +
     "</div>";
 
   const body = document.getElementById("notebody");
-  let mode = "w";
+
+  const LINE_TOKS = ["### ","## ","# ","1. ","- ","> ","!? ","!! ","!+ ","!= ","! "];
+  const stripTok = x => { for (const t of LINE_TOKS) if (x.startsWith(t)) return x.slice(t.length); return x; };
+
+  function applyTool(ta, b){
+    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    let out, cs, ce;
+    if (b.dataset.wrap !== undefined){
+      const i = b.dataset.wrap.indexOf("|");
+      const pre = b.dataset.wrap.slice(0, i), suf = b.dataset.wrap.slice(i + 1), sel = v.slice(s, e);
+      out = v.slice(0, s) + pre + sel + suf + v.slice(e);
+      cs = s + pre.length; ce = cs + sel.length;
+    } else if (b.dataset.line !== undefined){
+      const tok = b.dataset.line;
+      const ls = s === 0 ? 0 : v.lastIndexOf("\n", s - 1) + 1;
+      let le = v.indexOf("\n", e); if (le < 0) le = v.length;
+      const block = v.slice(ls, le).split("\n")
+        .map(x => x.startsWith(tok) ? x.slice(tok.length) : tok + stripTok(x)).join("\n");
+      out = v.slice(0, ls) + block + v.slice(le);
+      cs = ce = ls + block.length;
+    } else {
+      const t = b.dataset.ins || "";
+      out = v.slice(0, s) + t + v.slice(e);
+      cs = ce = s + t.length;
+    }
+    ta.value = out;
+    ta.focus(); ta.setSelectionRange(cs, ce);
+    setLesson(l.id, {note:ta.value});
+  }
+
+  function toolbar(){
+    const btn = (attr, val, label, cls, style, title) =>
+      "<button type=\"button\" " + attr + '="' + val + '"' +
+      (cls ? ' class="' + cls + '"' : "") +
+      (style ? ' style="' + style + '"' : "") +
+      (title ? ' title="' + esc(title) + '" aria-label="' + esc(title) + '"' : "") +
+      ">" + label + "</button>";
+    return '<div class="tools" id="tools">' +
+      '<div class="trow">' +
+        btn("data-line", "# ", esc(T.tbTitle)) +
+        btn("data-line", "## ", esc(T.tbSub)) +
+        btn("data-line", "### ", esc(T.tbSub2)) +
+        btn("data-line", "- ", esc(T.tbList)) +
+        btn("data-line", "1. ", esc(T.tbNum)) +
+        btn("data-line", "&gt; ", esc(T.tbQuote)) +
+        btn("data-ins", "&#10;---&#10;", esc(T.tbRule)) +
+      "</div>" +
+      '<div class="trow">' +
+        btn("data-wrap", "**|**", "<b>B</b>", "ico", "", T.tbBold) +
+        btn("data-wrap", "*|*", "<i>I</i>", "ico", "", T.tbItal) +
+        btn("data-wrap", "==|==", "<mark>A</mark>", "ico", "", T.tbMark) +
+        btn("data-wrap", "`|`", "<code>&lt;&gt;</code>", "ico", "", T.tbCode) +
+        '<span class="tlab" style="margin-inline-start:.6rem">' + esc(T.tbModes) + "</span>" +
+        CAL_SHOW.map(c => btn("data-line", c.tok + " ", "<i>" + c.glyph + "</i>" + esc(T.cal[c.k]), "calb", "--tone:" + c.tone)).join("") +
+      "</div>" +
+      '<div class="trow"><span class="tlab">' + esc(T.tbColors) + "</span>" +
+        COLORS.map(c => btn("data-wrap", "{" + c.k + ":|}", "", "sw", "--tone:" + c.tone, T.col[c.k])).join("") +
+      "</div>" +
+      '<details class="symdet"><summary>' + esc(T.tbSymbols) + "</summary>" +
+        '<div class="trow">' + SYMBOLS.map(s => btn("data-ins", s, s, "sym")).join("") + "</div>" +
+      "</details>" +
+    "</div>";
+  }
+
   function paintNote(){
-    if (mode === "w"){
-      body.innerHTML = '<textarea id="note-' + l.id + '" placeholder="' + esc(T.notePh) + '"></textarea>' +
-        '<p class="syntax">' + T.syntax + "</p>";
-      const ta = body.firstChild;
+    if (noteMode === "w"){
+      body.innerHTML = toolbar() +
+        '<textarea id="note-' + l.id + '" dir="auto" placeholder="' + esc(T.notePh) + '"></textarea>' +
+        '<details class="syndet"><summary>' + esc(T.synTitle) + '</summary>' +
+        '<p class="syntax">' + T.syntax + "</p></details>";
+      const ta = document.getElementById("note-" + l.id);
       ta.value = (les(l.id).note || "");
       ta.addEventListener("input", () => setLesson(l.id, {note:ta.value}));
+      const tb = document.getElementById("tools");
+      tb.addEventListener("mousedown", ev => { if (ev.target.closest("button")) ev.preventDefault(); });
+      tb.addEventListener("click", ev => {
+        const b = ev.target.closest("button");
+        if (b) applyTool(ta, b);
+      });
     } else {
       const src = (les(l.id).note || "").trim();
       body.innerHTML = src ? '<div class="typeset">' + typeset(src) + "</div>"
@@ -930,7 +1095,7 @@ function renderLesson(l){
   paintNote();
   document.getElementById("segmode").addEventListener("click", e => {
     const b = e.target.closest("button[data-m]"); if (!b) return;
-    mode = b.dataset.m;
+    noteMode = b.dataset.m;
     [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
     paintNote();
   });
@@ -982,15 +1147,15 @@ function renderAray(){
       (said.length ? '<div class="grid2">' + said.map(l =>
         '<article class="op" style="--accent:' + l.mod.accent + '"><h3>' + lat(l.title) + "</h3>" +
         '<p class="arname">' + esc(l.mod.fr) + " · " + esc(l.prof) + "</p>" +
-        ((les(l.id).hard||"").trim() ? '<p class="lab-hard">' + esc(T.sHard) + '</p><p class="quote">' + esc(les(l.id).hard.trim()) + "</p>" : "") +
-        ((les(l.id).easy||"").trim() ? '<p class="lab-easy">' + esc(T.sEasy) + '</p><p class="quote">' + esc(les(l.id).easy.trim()) + "</p>" : "") +
+        ((les(l.id).hard||"").trim() ? '<p class="lab-hard">' + esc(T.sHard) + '</p><p class="quote" dir="auto">' + esc(les(l.id).hard.trim()) + "</p>" : "") +
+        ((les(l.id).easy||"").trim() ? '<p class="lab-easy">' + esc(T.sEasy) + '</p><p class="quote" dir="auto">' + esc(les(l.id).easy.trim()) + "</p>" : "") +
         '<p style="margin:.9rem 0 0"><a class="srclink" href="#l-' + l.id + '">' + esc(T.openPage) + " " + AF + "</a></p></article>").join("") + "</div>"
         : '<p class="hint">' + esc(T.opsSaidHint) + "</p>") + "</section>" +
 
     '<section class="block"><h2>' + esc(T.opsMods) + "</h2>" +
       (ops.length ? '<div class="grid2">' + ops.map(m =>
         '<article class="op" style="--accent:' + m.accent + '"><h3>' + lat(m.fr) + "</h3>" +
-        '<p class="arname">' + esc(m.ar) + '</p><p class="txt">' + esc(S.modules[m.id].opinion.trim()) + "</p>" +
+        '<p class="arname">' + esc(m.ar) + '</p><p class="txt" dir="auto">' + esc(S.modules[m.id].opinion.trim()) + "</p>" +
         '<p style="margin:.9rem 0 0"><a class="srclink" href="#' + m.id + '">' + esc(T.openMod) + " " + AF + "</a></p></article>").join("") + "</div>"
         : '<p class="hint">' + esc(T.opsModsHint) + "</p>") + "</section>" +
     '<span class="ornament">❖ ❖ ❖</span>';
@@ -1077,12 +1242,16 @@ async function useCap(name){
   const busy = p => !!(queue[p] && (queue[p].dirty || queue[p].running));
 
   db.collection("lessons").onSnapshot(snap => {
+    let changed = false;
     snap.docs.forEach(d => {
       const p = "lessons/" + d.id;
       if (busy(p)) return;
-      S.lessons[d.id] = d.data() || {}; local[p] = S.lessons[d.id];
+      const data = d.data() || {};
+      if (S.lessons[d.id] === data) return;   /* unchanged docs come back identical */
+      S.lessons[d.id] = data; local[p] = data; changed = true;
     });
-    if (!snap.metadata.fromCache) settle(); else safeRender();
+    if (!snap.metadata.fromCache) settle();
+    else if (changed) safeRender();
   }, e => {
     stale = true; S.loaded = true;
     note(T.bStale(e && e.code ? " (" + e.code + ")" : ""));
